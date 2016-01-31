@@ -68,6 +68,7 @@ d1=0;
 begin
 
 draw_z=1024;
+//graph=9;
 
 //write_int(0,0,0,0,&x);
 //write_int(0,0,16,0,&y);
@@ -82,6 +83,7 @@ d1=draw(1,136,0,0,x1,y1,x,y);
 //graph=2;
 //size=100;
 //z=-1024;
+//rope();
 loop
 
 x=x1+sin(timer[0]*800)/15;
@@ -95,6 +97,26 @@ end
 
 
 end
+
+process rope();
+
+begin
+
+x=152;
+y=30;
+graph=9;
+size=40;
+
+loop
+angle=get_angle(father);
+frame;
+
+end
+
+end
+
+
+
 
 process trees()
 
@@ -256,14 +278,14 @@ d=0;
 dd=0;
 begin
 
-x=160;
+x=(sw/2)-8;
 y=120;
 graph=8;
 size=100;
 loop
 
 d++;
-if(d==80)
+if(d==130)
     if(size==100)
         while(size>0)
             size-=5;
