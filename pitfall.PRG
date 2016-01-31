@@ -1,30 +1,38 @@
 program pitfall;
 
 const
-sw=320;
-sh=240;
-fpsec=50;
-
+    sw=320;
+    sh=240;
+    fpsec=50;
+    floor=110;
+    base=210;
 
 global
-vineid=0;
-sounds[10];
-framecount=0;
-soundspeed=256*((fpsec*1000)/50)/1000;
+    vineid=0;
+    level=0;
+
+    // sounds
+    struct fx
+        death;
+        fall;
+        hit1;
+        hit2;
+        jump;
+        swing;
+        treasure;
+    end
+
+    framecount=0;
+    soundspeed=256*((fpsec*1000)/50)/1000;
 
 begin
 
-write_int(0,0,64,0,&soundspeed);
+    load_sounds();
+    set_fps(fpsec,2);
+    load_fpg("pitfall/pitfall.fpg");
+    set_mode(sw*1000+sh);
 
-
-sounds[0]=load_wav("pitfall/jump.wav",0); // jump
-sounds[1]=load_wav("pitfall/swing.wav",0); // swing
-set_fps(fpsec,2);
-
-load_fpg("pitfall/pitfall.fpg");
-set_mode(sw*1000+sh);
-
-put(file,6,sw/2,sh/2);
+    put(file,6,sw/2,sh/2);
 
 //graph=1;
 
@@ -32,15 +40,10 @@ size=10;
 x=320;
 y=400;
 
-vineid=vine();
-trees();
-path();
-harry();
-pit();
-
+game();
 
 loop
-framecount++;
+    framecount++;
 frame;
 
 end
@@ -62,8 +65,27 @@ end
 
 end
 
+process game()
+
+begin
+
+level=1;
+
+vineid=vine();
+trees();
+path();
+harry();
+pit();
+
+loop
+    frame;
+end
+
+end
+
 
 process vine()
+
 
 private
 x1=sw/2-8;
@@ -78,8 +100,8 @@ begin
 draw_z=1024;
 //graph=9;
 
-write_int(0,0,0,0,&x);
-write_int(0,0,16,0,&y);
+//write_int(0,0,0,0,&x);
+//write_int(0,0,16,0,&y);
 
 
 //x1=320;
@@ -110,57 +132,51 @@ process rope();
 
 begin
 
-x=152;
-y=30;
-graph=9;
-size=40;
+    x=152;
+    y=30;
+    graph=9;
+    size=40;
 
-loop
-angle=get_angle(father);
-frame;
+    loop
+        angle=get_angle(father);
+        frame;
+    end
 
 end
-
-end
-
-
 
 
 process trees()
 
 begin
 
-graph=5;
-x=sw/2-8;
-y=85;
+    graph=5;
+    x=sw/2-8;
+    y=85;
 
-clone
-    graph=4;
-    x=sw/2;
-    y=30;
-    //z=1024;
-end
+    clone
+        graph=4;
+        x=sw/2;
+        y=30;
+    end
 
-
-
-loop
-frame;
-end
+    loop
+        frame;
+    end
 
 end
+
 
 process path();
 
 begin
 
-graph=7;
+    graph=7;
+    x=sw/2;
+    y=127;
 
-x=sw/2;
-y=127;
-
-loop
-frame;
-end
+    loop
+        frame;
+    end
 
 end
 
@@ -185,12 +201,6 @@ swinging=0;
 
 begin
 
-write_int(0,32,0,0,&x);
-write_int(0,32,16,0,&y);
-
-
-graph=10;
-
 x=60;
 y=110;
 
@@ -207,10 +217,12 @@ loop
 
             if(key(_left))
                 dir=-1;
+                flags=1;
             end
 
             if(key(_right))
                 dir=1;
+                flags=0;
             end
         end
     end
@@ -219,7 +231,7 @@ loop
 
         if(key(_space) && yx!=-5)
             yx=-5;
-            playsound(0);
+            playsound(fx.jump);
 
         end
 
@@ -262,7 +274,7 @@ loop
             && x>vineid.x-10 && x<vineid.x+10)
             if(swinging==0)
                 swinging=1;
-                playsound(1);
+                playsound(fx.swing);
             end
         else
             d++;
@@ -277,8 +289,8 @@ loop
         end
 
     end
-    if(x<16) x=304; end
-    if(x>304) x=16; end
+    if(x<16) x=304; level--; end
+    if(x>304) x=16; level++; end
 
     //end
 
@@ -290,40 +302,72 @@ end
 
 process pit()
 
+private
+    oldlevel=0;
+    psize=100;
+    pdir=0;
+
 begin
 
-x=(sw/2)-8;
-y=120;
-graph=8;
-size=100;
-loop
+    x=(sw/2)-8;
+    y=120;
+    graph=8;
+    size=100;
 
-if(framecount%130==1)
-    if(size==100)
-        while(size>0)
-            size-=5;
-            frame;
+    loop
+        if(level!=oldlevel)
+            oldlevel=level;
+            if(level&1)
+                graph=8;
+            else
+                graph=9;
+                size=100;
+            end
         end
-    else
-        while(size<100)
-            size+=5;
-            frame;
+
+        if(framecount%130==1)
+            if(psize==100)
+                pdir=-5;
+            else
+                pdir=5;
+            end
         end
+
+        if(pdir!=0)
+            if((pdir<0 && psize>0) || (pdir>0 && psize<100))
+                psize+=pdir;
+            end
+        end
+
+        if(level&1) // pit
+            size=psize;
+        end
+
+        frame;
+
     end
-end
-
-frame;
-
 
 end
 
+function load_sounds();
+
+begin
+
+    fx.death=load_wav("pitfall/death.wav",0);
+    fx.fall=load_wav("pitfall/fall.wav",0);
+    fx.hit1=load_wav("pitfall/hit1.wav",0);
+    fx.hit2=load_wav("pitfall/hit2.wav",0);
+    fx.jump=load_wav("pitfall/jump.wav",0);
+    fx.swing=load_wav("pitfall/swing.wav",0);
+
 end
+
 
 function playsound(num)
 
 begin
 
-x=sound(sounds[num],256,256);
-change_sound(x,256,soundspeed);
+    x=sound(num,256,256);
+    change_sound(x,256,soundspeed);
 
 end
