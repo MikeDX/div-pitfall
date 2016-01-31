@@ -17,7 +17,7 @@ global
 
     alive=1;
 
-    level=0;
+    level=196;
         // sounds
     struct fx
         death;
@@ -41,6 +41,8 @@ begin
 
     put(file,3,sw/2,sh/2);//+offy-1);
 
+    write_int(0,0,64,0,&level);
+
 //graph=3;
 //region=1;
 //ctype=c_scroll;
@@ -49,6 +51,7 @@ begin
     y=sh/2;//191/2;
 //flags=4;
     z=1024;
+    //next_level();
 
     game();
 
@@ -69,7 +72,7 @@ process game()
 
 begin
 
-level=1;
+level=196;
 
 vineid=vine();
 trees();
@@ -108,9 +111,12 @@ d=draw(1,60,0,0,x1,y1,x,y);
 d1=draw(1,60,0,0,x1,y1,x,y);
 
 loop
-
+if(level%3==0)
 x=x1+sin(framecount*2*700)/15;
-y=-379+cos(abs(x1-x)*180)/2;
+y=-379+ cos(abs(x1-x)*180)/2;
+else
+x=x1;y=y1;
+end
 move_draw(d,60,15,x1,y1,x,y);
 move_draw(d1,60,15,x1+1,y1,x+1,y);
 
@@ -182,7 +188,7 @@ begin
 
     clone
         graph=4;
-        z=-256;
+//        z=-256;
         x=sw/2;
         y=30+offy;
     end
@@ -293,16 +299,23 @@ loop
 
     if(crocid)
         if(crocid.graph==33)
-            if(x<crocid.x+4)
+            if(x<crocid.x+5)
                 dropdeath();
                 return;
             end
         end
     end
 
-    if(x>92 && x< 214 && collision(type pit) && !collision(type crocs))
-        dropdeath();
-        return;
+    if(x>92 && x< 214 && collision(type pit))
+        //debug;
+        y++;
+        crocid=collision(type crocs);
+        y--;
+
+        if(!crocid)
+            dropdeath();
+            return;
+        end
     end
 
     if(above==0)
@@ -407,8 +420,8 @@ loop
         end
 
     end
-    if(x<16) x=304; level--; end
-    if(x>304) x=16; level++; end
+    if(x<16) x=304; level_left(); end
+    if(x>304) x=16; level_right(); end
 
     //end
 
@@ -474,12 +487,12 @@ process scorpion();
 begin
 
 x=sw/2;
-y=169+offy;
+y=168+offy;
 
 graph=30;
 
 loop;
-if(framecount&1)
+if(framecount&1 && alive)
     if(x<harryid.x)
         x++;
         flags=0;
@@ -491,7 +504,7 @@ if(framecount&1)
     end
 
     if(harryid.x!=x)
-            graph=30+((x/4)&1);
+        graph=30+((x/4)&1);
     end
 end
 
@@ -525,3 +538,41 @@ begin
     change_sound(x,256,soundspeed);
 
 end
+
+
+function level_right()
+
+private
+t;
+begin
+//write_int(0,0,64,0,&t);
+//write_int(0,0,80,0,&level);
+
+t=(level>>7) XOR (level>>5) XOR (level>>4) XOR (level>>3);
+level = (level<<1)%256;
+level |= (t & 1);
+
+//frame;
+//debug;
+
+end
+
+function level_left()
+
+private
+t;
+begin
+write_int(0,0,64,0,&t);
+write_int(0,0,80,0,&level);
+t=(level>>6) XOR (level >>5) XOR ( level >> 4) XOR level;
+
+//t=(level>>7) XOR (level>>5) XOR (level>>4) XOR (level>>3);
+level = (level>>1);
+level |= ((t<<7)%256);
+
+//frame;
+debug;
+
+
+end
+
