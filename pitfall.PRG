@@ -28,6 +28,7 @@ vineid=vine();
 trees();
 path();
 harry();
+pit();
 
 
 loop
@@ -83,7 +84,7 @@ d1=draw(1,136,0,0,x1,y1,x,y);
 //z=-1024;
 loop
 
-x=x1+sin(timer[0]*900)/15;
+x=x1+sin(timer[0]*800)/15;
 y=(-10-sh-x1)+cos(abs(x1-x)*180)/2;
 move_draw(d,56,15,x1,y1,x,y);
 move_draw(d1,56,15,x1+1,y1,x+1,y);
@@ -168,6 +169,15 @@ loop
             swinging=0;
             yx=0;
             y+=4;
+            dir=0;
+
+            if(key(_left))
+                dir=-1;
+            end
+
+            if(key(_right))
+                dir=1;
+            end
         end
     end
 
@@ -175,7 +185,6 @@ loop
 
         if(key(_space))
             yx=-5;
-         //   y-=6;
         end
 
         if(key(_right))
@@ -236,6 +245,43 @@ loop
 
 
 frame;
+end
+
+end
+
+process pit()
+
+private
+d=0;
+dd=0;
+begin
+
+x=160;
+y=120;
+graph=8;
+size=100;
+loop
+
+d++;
+if(d==80)
+    if(size==100)
+        while(size>0)
+            size-=5;
+            frame;
+        end
+    else
+        while(size<100)
+            size+=5;
+            frame;
+        end
+    end
+    //debug;
+    d=0;
+end
+
+frame;
+
+
 end
 
 end
