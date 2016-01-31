@@ -11,14 +11,27 @@ const
 
 global
     vineid=0;
-    pitid=0;
-    crocsid=0;
     harryid=0;
 
     alive=1;
 
-    level=196;
-        // sounds
+    // level data
+    tarpit=0;
+    shifting=0;
+    snake=0;
+    wall=0;
+    bg=0;
+    treasure=0;
+    logs=0;
+    holes=0;
+    vine=0;
+    crocs=0;
+
+
+    level=0;
+    bit[8];
+
+    // sounds
     struct fx
         death;
         fall;
@@ -33,6 +46,16 @@ global
     soundspeed=256*((fpsec*1000)/50)/1000;
 
 begin
+    write_int(0,0,0,0,&tarpit);
+    write_int(0,0,8,0,&shifting);
+    write_int(0,0,16,0,&snake);
+    write_int(0,0,24,0,&wall);
+    write_int(0,0,32,0,&bg);
+    write_int(0,0,40,0,&treasure);
+    write_int(0,0,48,0,&logs);
+    write_int(0,0,56,0,&holes);
+    write_int(0,0,64,0,&vine);
+    write_int(0,0,72,0,&crocs);
 
     load_sounds();
     set_fps(fpsec,2);
@@ -72,9 +95,10 @@ process game()
 
 begin
 
-    level=226;
+    level=196;
+    level_update();
 
-    vineid=vine();
+    vineid=vineproc();
 
     // 1 of 4 different tree types
     trees();
@@ -85,15 +109,15 @@ begin
     // pit or quicksand
     pit();
 
-    crocs();
+    crocproc();
 
     // snake or fire
-    snake();
+    object();
 
     // left, right or no wall
-    wall();
+    //walls();
 
-    // player-chasing scorpoin
+    // player-chasing scorpion (or walls)
     scorpion();
 
 harryid=harry();
@@ -106,7 +130,7 @@ end
 end
 
 
-process vine()
+process vineproc()
 
 
 private
@@ -125,7 +149,7 @@ d=draw(1,60,0,0,x1,y1,x,y);
 d1=draw(1,60,0,0,x1,y1,x,y);
 
 loop
-if(level%3==0)
+if(vine)
 x=x1+sin(framecount*2*700)/15;
 y=-379+ cos(abs(x1-x)*180)/2;
 else
@@ -141,7 +165,7 @@ end
 
 end
 
-process crocs()
+process crocproc()
 
 begin
 
@@ -157,7 +181,7 @@ end
 graph=32;
 
 loop
-if(level&1)
+if(!crocs)
 size=0;
 else
 size=100;
@@ -213,7 +237,7 @@ begin
 
 end
 
-process snake();
+process object();
 
 begin
 
@@ -221,12 +245,21 @@ x=249;
 y=144;
 
 loop
-graph=34+(framecount&1);
-frame;
+    graph=0;
+    if(snake)
+        graph=34+(framecount&1);
+    end
+
+    if(logs>0)
+        graph=20;
+    end
+
+    frame;
 
 end
 
 end
+
 
 process path();
 
@@ -304,12 +337,12 @@ begin
 
     x=24+offx;
     y=offy+25;
-    write_int(0,0,0,0,&x);
-    write_int(0,0,16,0,&y);
+    //write_int(0,0,0,0,&x);
+    //write_int(0,0,16,0,&y);
 
 loop
 
-    crocid=collision(type crocs);
+    crocid=collision(type crocproc);
 
     if(crocid)
         if(crocid.graph==33)
@@ -322,9 +355,9 @@ loop
 
     if(x>92 && x< 214 && collision(type pit))
         //debug;
-        y++;
-        crocid=collision(type crocs);
-        y--;
+        y+=2;
+        crocid=collision(type crocproc);
+        y-=2;
 
         if(!crocid)
             dropdeath();
@@ -434,9 +467,12 @@ loop
         end
 
     end
-    if(x<16) x=304; level_left(); end
-    if(x>304) x=16; level_right(); end
+    if(x<16 || key(_q)) x=304; level_left(); end
+    if(x>304 || key(_w)) x=16; level_right(); end
 
+    while(key(_q) || key(_w))
+        frame;
+    end
     //end
 
 
@@ -461,15 +497,22 @@ begin
     size=100;
 
     loop
-        if(level!=oldlevel)
-            oldlevel=level;
-            if(level&1)
+
+        if(shifting==0)
+            size=100;
+        end
+
+    if(tarpit>0)
+//        if(level!=oldlevel)
+//            oldlevel=level;
+//            if(level&1)
+            if(tarpit==1)
                 graph=8;
             else
                 graph=9;
-                size=100;
+//                size=100;
             end
-        end
+//        end
 
         if(framecount%130==1)
             if(psize==100)
@@ -485,10 +528,12 @@ begin
             end
         end
 
-        if(level&1) // pit
+        if(shifting) // pit
             size=psize;
         end
-
+    else
+        graph=0;
+    end
         frame;
 
     end
@@ -506,35 +551,48 @@ y=168+offy;
 graph=30;
 
 loop;
-if(framecount&1 && alive)
-    if(x<harryid.x)
-        x++;
-        flags=0;
+
+if(holes==0)
+    if(graph==21)
+        graph=30;
+        x=sw/2;
     end
 
-    if(x>harryid.x)
-        x--;
-        flags=1;
+    y=168+offy;
+
+    if(framecount&1 && alive)
+        if(x<harryid.x)
+            x++;
+            flags=0;
+        end
+
+        if(x>harryid.x)
+            x--;
+            flags=1;
+        end
+
+        if(harryid.x!=x)
+            graph=30+((x/4)&1);
+        end
+    end
+else
+
+    graph=21;
+    y=159+offy;
+    if(bit[7]==1)
+        x=280;
+    else
+        x=20;
     end
 
-    if(harryid.x!=x)
-        graph=30+((x/4)&1);
-    end
 end
+
 
 frame;
 
 end
 
 end
-
-
-process wall();
-
-begin
-
-end
-
 
 
 function load_sounds();
@@ -593,6 +651,89 @@ end
 
 function level_update()
 
+private
+
 begin
+
+    for(x=0;x<8;x++)
+        bit[x]=(level>>x)&1;
+    end
+
+    tarpit=0;
+    shifting=0;
+    snake=0;
+    wall=0;
+    bg=0;
+    treasure=0;
+    logs=0;
+    holes=0;
+    vine=0;
+    crocs=0;
+
+    // setup level
+
+    switch(7&(level>>3))
+
+        case 0:  // hole with ladder
+            holes=1;
+            end
+
+        case 1:  // hole with ladder + 2 holes
+            holes=3;
+            end
+
+        case 2:  // tar pit + vine
+            //debug;
+            vine=1;
+            tarpit=1;
+            end
+
+        case 3:  // quicksand with vine
+            vine=1;
+            tarpit=2;
+            end
+
+        case 4:  // croc pit
+            crocs=1;
+            tarpit=2; // lake
+            if(bit[1])  // plus vine if bit 1
+                vine=1;
+            end
+
+            end
+
+        case 5:  //shifting tar pit + treasure
+            tarpit=1;
+            shifting=1;
+            treasure=(level&3); // one of 4 types
+            end
+
+        case 6:  // shifting tarpit + vine
+            tarpit=1;
+            shifting=1;
+            vine=1;
+            end
+
+        case 7:  // shifting quicksand
+            shifting=1;
+            tarpit=2;
+            end
+    end
+
+    if(crocs==0 && treasure==0)
+        x=level&7;
+        if(x<6)
+            logs=x;
+        else
+            if(x==6)
+                snake=2;
+            end
+            if(x==7)
+                snake=1;
+            end
+        end
+    end
+
+
 
 end
