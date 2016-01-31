@@ -72,15 +72,29 @@ process game()
 
 begin
 
-level=196;
+    level=226;
 
-vineid=vine();
-trees();
-path();
-pit();
-crocs();
-snake();
-scorpion();
+    vineid=vine();
+
+    // 1 of 4 different tree types
+    trees();
+
+    // 1 of 3 paths (solid, ladder, ladder + holes)
+    path();
+
+    // pit or quicksand
+    pit();
+
+    crocs();
+
+    // snake or fire
+    snake();
+
+    // left, right or no wall
+    wall();
+
+    // player-chasing scorpoin
+    scorpion();
 
 harryid=harry();
 son.y=134;
@@ -515,6 +529,13 @@ end
 end
 
 
+process wall();
+
+begin
+
+end
+
+
 
 function load_sounds();
 
@@ -539,40 +560,39 @@ begin
 
 end
 
+// pitfall levels LFSR
 
 function level_right()
 
 private
-t;
+    t;
 begin
-//write_int(0,0,64,0,&t);
-//write_int(0,0,80,0,&level);
+    t=(level>>7) XOR (level>>5) XOR (level>>4) XOR (level>>3);
+    level = (level<<1)%256;
+    level |= (t & 1);
 
-t=(level>>7) XOR (level>>5) XOR (level>>4) XOR (level>>3);
-level = (level<<1)%256;
-level |= (t & 1);
-
-//frame;
-//debug;
+    level_update();
 
 end
+
 
 function level_left()
 
 private
-t;
+    t;
 begin
-write_int(0,0,64,0,&t);
-write_int(0,0,80,0,&level);
-t=(level>>6) XOR (level >>5) XOR ( level >> 4) XOR level;
+    t=(level>>6) XOR (level >>5) XOR ( level >> 4) XOR level;
 
-//t=(level>>7) XOR (level>>5) XOR (level>>4) XOR (level>>3);
-level = (level>>1);
-level |= ((t<<7)%256);
+    level = (level>>1);
+    level |= ((t<<7)%256);
 
-//frame;
-debug;
-
+    level_update();
 
 end
 
+
+function level_update()
+
+begin
+
+end
