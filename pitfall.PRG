@@ -4,6 +4,11 @@ const
 sw=320;
 sh=240;
 
+
+global
+vineid=0;
+
+
 begin
 
 set_fps(60,2);
@@ -19,7 +24,7 @@ size=10;
 x=320;
 y=400;
 
-vine();
+vineid=vine();
 trees();
 path();
 harry();
@@ -145,6 +150,8 @@ walk=1;
 yx=0;
 d=0;
 dir=0;
+swinging=0;
+
 begin
 
 graph=10;
@@ -153,6 +160,16 @@ x=60;
 y=110;
 
 loop
+    if(swinging)
+        x=vineid.x;
+        y=vineid.y;
+        graph=2;
+        if(key(_down))
+            swinging=0;
+            yx=0;
+            y+=4;
+        end
+    end
 
     if(y==110)
 
@@ -195,15 +212,22 @@ loop
         end
     end
 
-    if(yx<6 && y<110 || yx==-5)
-        d++;
-        if(d%3==0)
-            y+=yx;
-            yx++;
-            graph=11;
-            //x=x+dir;
+    if(yx<10 && y<110 || yx==-5)
+        if(yx<0 && y>vineid.y-10 && y<vineid.y+10
+            && x>vineid.x-5 && x<vineid.x+5)
+            swinging=1;
+        else
+            d++;
+            if(d%3==0)
+                y+=yx;
+                yx++;
+                graph=11;
+            end
+            x=x+dir;
+            if(y>110) y=110; end
+
         end
-        x=x+dir;
+
     end
     if(x<16) x=304; end
     if(x>304) x=16; end
