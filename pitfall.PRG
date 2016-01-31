@@ -22,6 +22,7 @@ y=400;
 vine();
 trees();
 path();
+harry();
 
 
 loop
@@ -72,9 +73,9 @@ draw_z=1024;
 d=draw(1,136,0,0,x1,y1,x,y);
 d1=draw(1,136,0,0,x1,y1,x,y);
 
-graph=2;
-size=100;
-z=-1024;
+//graph=2;
+//size=100;
+//z=-1024;
 loop
 
 x=x1+sin(timer[0]*900)/15;
@@ -134,5 +135,83 @@ process swing()
 begin
 
 graph=2;
+
+end
+
+
+process harry()
+private
+walk=1;
+yx=0;
+d=0;
+dir=0;
+begin
+
+graph=10;
+
+x=60;
+y=110;
+
+loop
+
+    if(y==110)
+
+        if(key(_space))
+            yx=-5;
+         //   y-=6;
+        end
+
+        if(key(_right))
+            flags=0;
+            dir=1;
+            x=x+1;
+            if(x%3==0)
+                walk=walk+1;
+                if(walk==6) walk=1; end
+            end
+
+            graph=10+walk;
+        end
+
+
+        if(key(_left))
+            flags=1;
+            dir=-1;
+            x=x-1;
+
+            if(x%3==0)
+                walk=walk+1;
+                if(walk==6) walk=1; end
+            end
+
+            graph=10+walk;
+
+        end
+
+        if(!key(_right) && !key(_left))
+            walk=0;
+            graph=10;
+            dir=0;
+        end
+    end
+
+    if(yx<6 && y<110 || yx==-5)
+        d++;
+        if(d%3==0)
+            y+=yx;
+            yx++;
+            graph=11;
+            //x=x+dir;
+        end
+        x=x+dir;
+    end
+    if(x<16) x=304; end
+    if(x>304) x=16; end
+
+    //end
+
+
+frame;
+end
 
 end
