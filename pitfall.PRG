@@ -6,12 +6,18 @@ const
     fpsec=50;
     floor=110;
     base=210;
+    offx=8;
+    offy=25;
 
 global
     vineid=0;
-    level=0;
+    pitid=0;
+    crocsid=0;
 
-    // sounds
+    alive=0;
+
+    level=0;
+        // sounds
     struct fx
         death;
         fall;
@@ -32,18 +38,23 @@ begin
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
 
-    put(file,6,sw/2,sh/2);
+    put(file,3,sw/2,sh/2);
 
-//graph=1;
-
-size=10;
-x=320;
-y=400;
+//graph=3;
+//region=1;
+//ctype=c_scroll;
+size=100;
+x=sw/2;//304/2;
+y=sh/2;//191/2;
+flags=4;
+z=1024;
 
 game();
 
 loop
-    framecount++;
+    if(alive)
+        framecount++;
+    end
 frame;
 
 end
@@ -70,12 +81,17 @@ process game()
 begin
 
 level=1;
+//define_region(1,8,25,304,191);
+//start_scroll(0,region,6,8,1,15);
 
 vineid=vine();
 trees();
 path();
-harry();
 pit();
+crocs();
+snake();
+
+harry();
 
 loop
     frame;
@@ -89,15 +105,16 @@ process vine()
 
 private
 x1=sw/2-8;
-y1=30;
+y1=30+offy;
 
 d=0;
 d1=0;
 
 
 begin
-
-draw_z=1024;
+region=1;
+//ctype=c_scroll;
+draw_z=257;
 //graph=9;
 
 //write_int(0,0,0,0,&x);
@@ -107,8 +124,8 @@ draw_z=1024;
 //x1=320;
 //y1=0;
 
-d=draw(1,136,0,0,x1,y1,x,y);
-d1=draw(1,136,0,0,x1,y1,x,y);
+d=draw(1,60,0,0,x1,y1,x,y);
+d1=draw(1,60,0,0,x1,y1,x,y);
 
 //graph=2;
 //size=100;
@@ -117,9 +134,9 @@ d1=draw(1,136,0,0,x1,y1,x,y);
 loop
 
 x=x1+sin(framecount*2*700)/15;
-y=(-10-sh-x1)+cos(abs(x1-x)*180)/2;
-move_draw(d,56,15,x1,y1,x,y);
-move_draw(d1,56,15,x1+1,y1,x+1,y);
+y=-379+cos(abs(x1-x)*180)/2;
+move_draw(d,60,15,x1,y1,x,y);
+move_draw(d1,60,15,x1+1,y1,x+1,y);
 
 frame;
 
@@ -128,9 +145,43 @@ end
 
 end
 
+process crocs()
+
+begin
+
+y=117+offy;
+x=sw/2-9;
+clone
+x-=32;
+end
+clone
+x+=32;
+end
+
+graph=32;
+
+loop
+if(level&1)
+size=0;
+else
+size=100;
+end
+
+if(framecount%120<60)
+graph=32;
+else
+graph=33;
+end
+
+frame;
+end
+
+end
+
 process rope();
 
 begin
+    region=1;
 
     x=152;
     y=30;
@@ -151,12 +202,12 @@ begin
 
     graph=5;
     x=sw/2-8;
-    y=85;
+    y=82+offy;
 
     clone
         graph=4;
         x=sw/2;
-        y=30;
+        y=30+offy;
     end
 
     loop
@@ -165,6 +216,20 @@ begin
 
 end
 
+process snake();
+
+begin
+
+x=249;
+y=144;
+
+loop
+graph=34+(framecount&1);
+frame;
+
+end
+
+end
 
 process path();
 
@@ -172,7 +237,8 @@ begin
 
     graph=7;
     x=sw/2;
-    y=127;
+    y=151;
+    flags=4;
 
     loop
         frame;
@@ -186,28 +252,92 @@ process swing()
 
 begin
 
-graph=2;
+    graph=2;
+
+end
+
+
+process dropdeath()
+
+begin
+x=father.x;
+y=father.y;
+graph=father.graph;
+flags=father.flags;
+father.graph=0;
+//signal(father.father,s_sleep_tree);
+signal(father,s_kill);
+//frame;
+define_region(2,x-10,y-10,10,20);
+region=2;
+//debug;
+playsound(fx.death);
+//debug;
+while(y<150)
+y++;
+frame(200);
+
+end
+
+harry();
 
 end
 
 
 process harry()
-private
-walk=1;
-yx=0;
-d=0;
-dir=0;
-swinging=0;
 
-topy=111;
-boty=200;
+private
+    walk=1;
+    yx=0;
+    d=0;
+    dir=0;
+    swinging=0;
+    ladder=0;
+    above=1;
+
+    topy=109+offy;
+
+    boty=164+offy;
+    groundy;
+    crocid=0;
 
 begin
+    alive=1;
+    graph=10;
 
-x=60;
-y=topy;
+    //region=1;
+    //ctype=c_scroll;
+    x=24+offx;
+//    y=topy+offy;
+    write_int(0,0,0,0,&x);
+    write_int(0,0,16,0,&y);
 
 loop
+
+    crocid=collision(type crocs);
+
+    if(crocid)
+        if(crocid.graph==33)
+            if(x<crocid.x+4)
+                dropdeath();
+                return;
+                //playsound(fx.death);
+            end
+        end
+    end
+
+    if(x>92 && x< 214 && collision(type pit) && !collision(type crocs))
+        dropdeath();
+        return;
+        //playsound(fx.hit1);
+    end
+
+    if(above==0)
+        groundy=boty;
+    else
+        groundy=topy;
+    end
+
     if(swinging)
         x=vineid.x;
         y=vineid.y;
@@ -216,8 +346,11 @@ loop
             swinging=0;
             yx=0;
             y+=4;
-            dir=0;
-
+            if(flags==0)
+                dir=1;
+            else
+                dir=-1;
+            end
             if(key(_left))
                 dir=-1;
                 flags=1;
@@ -230,7 +363,7 @@ loop
         end
     end
 
-    if(y==topy)
+    if(y==groundy)
 
         if(key(_space) && yx!=-5)
             yx=-5;
@@ -272,7 +405,7 @@ loop
         end
     end
 
-    if(yx<10 && y<topy || yx==-5)
+    if(y<groundy || yx==-5)
         if(yx<0 && y>vineid.y-10 && y<vineid.y+15
             && x>vineid.x-10 && x<vineid.x+10)
             if(swinging==0)
@@ -283,11 +416,15 @@ loop
             d++;
             if(d%3==0)
                 y+=yx;
-                yx++;
+
+                if(yx<8)
+                    yx++;
+                end
+
                 graph=11;
             end
             x=x+dir;
-            if(y>topy) y=topy; end
+            if(y>groundy) y=groundy; end
 
         end
 
@@ -311,9 +448,10 @@ private
     pdir=0;
 
 begin
-
+   // region=1;
+   // ctype=c_scroll;
     x=(sw/2)-8;
-    y=120;
+    y=119+offy;
     graph=8;
     size=100;
 
