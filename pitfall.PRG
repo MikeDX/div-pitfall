@@ -199,10 +199,13 @@ d=0;
 dir=0;
 swinging=0;
 
+topy=111;
+boty=200;
+
 begin
 
 x=60;
-y=110;
+y=topy;
 
 loop
     if(swinging)
@@ -227,7 +230,7 @@ loop
         end
     end
 
-    if(y==110)
+    if(y==topy)
 
         if(key(_space) && yx!=-5)
             yx=-5;
@@ -269,8 +272,8 @@ loop
         end
     end
 
-    if(yx<10 && y<110 || yx==-5)
-        if(yx<0 && y>vineid.y-10 && y<vineid.y+10
+    if(yx<10 && y<topy || yx==-5)
+        if(yx<0 && y>vineid.y-10 && y<vineid.y+15
             && x>vineid.x-10 && x<vineid.x+10)
             if(swinging==0)
                 swinging=1;
@@ -284,7 +287,7 @@ loop
                 graph=11;
             end
             x=x+dir;
-            if(y>110) y=110; end
+            if(y>topy) y=topy; end
 
         end
 
