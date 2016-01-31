@@ -13,8 +13,9 @@ global
     vineid=0;
     pitid=0;
     crocsid=0;
+    harryid=0;
 
-    alive=0;
+    alive=1;
 
     level=0;
         // sounds
@@ -38,51 +39,37 @@ begin
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
 
-    put(file,3,sw/2,sh/2);
+    put(file,3,sw/2,sh/2);//+offy-1);
 
 //graph=3;
 //region=1;
 //ctype=c_scroll;
-size=100;
-x=sw/2;//304/2;
-y=sh/2;//191/2;
-flags=4;
-z=1024;
+    size=100;
+    x=sw/2;//304/2;
+    y=sh/2;//191/2;
+//flags=4;
+    z=1024;
 
-game();
+    game();
 
-loop
-    if(alive)
-        framecount++;
+    loop
+        if(alive)
+            framecount++;
+        end
+        frame;
+
     end
-frame;
+
+    frame;
 
 end
 
-loop
-
-//size=50+sin(timer[0]*720)/(1000/45);
-x=sw/2+cos(timer[0]*720)/(1000/240);
-
-if(size<40)
-flags=4;
-else
-flags=0;
-end
-
-frame;
-
-end
-
-end
 
 process game()
 
 begin
 
 level=1;
-//define_region(1,8,25,304,191);
-//start_scroll(0,region,6,8,1,15);
 
 vineid=vine();
 trees();
@@ -90,8 +77,10 @@ path();
 pit();
 crocs();
 snake();
+scorpion();
 
-harry();
+harryid=harry();
+son.y=134;
 
 loop
     frame;
@@ -113,24 +102,11 @@ d1=0;
 
 begin
 region=1;
-//ctype=c_scroll;
 draw_z=257;
-//graph=9;
-
-//write_int(0,0,0,0,&x);
-//write_int(0,0,16,0,&y);
-
-
-//x1=320;
-//y1=0;
 
 d=draw(1,60,0,0,x1,y1,x,y);
 d1=draw(1,60,0,0,x1,y1,x,y);
 
-//graph=2;
-//size=100;
-//z=-1024;
-//rope();
 loop
 
 x=x1+sin(framecount*2*700)/15;
@@ -206,6 +182,7 @@ begin
 
     clone
         graph=4;
+        z=-256;
         x=sw/2;
         y=30+offy;
     end
@@ -238,7 +215,7 @@ begin
     graph=7;
     x=sw/2;
     y=151;
-    flags=4;
+    //flags=4;
 
     loop
         frame;
@@ -260,6 +237,7 @@ end
 process dropdeath()
 
 begin
+alive=0;
 x=father.x;
 y=father.y;
 graph=father.graph;
@@ -268,7 +246,7 @@ father.graph=0;
 //signal(father.father,s_sleep_tree);
 signal(father,s_kill);
 //frame;
-define_region(2,x-10,y-10,10,20);
+define_region(2,x-10,y-10,20,20);
 region=2;
 //debug;
 playsound(fx.death);
@@ -288,7 +266,7 @@ process harry()
 
 private
     walk=1;
-    yx=0;
+    yx=3;
     d=0;
     dir=0;
     swinging=0;
@@ -302,13 +280,10 @@ private
     crocid=0;
 
 begin
-    alive=1;
     graph=10;
 
-    //region=1;
-    //ctype=c_scroll;
     x=24+offx;
-//    y=topy+offy;
+    y=offy+25;
     write_int(0,0,0,0,&x);
     write_int(0,0,16,0,&y);
 
@@ -321,7 +296,6 @@ loop
             if(x<crocid.x+4)
                 dropdeath();
                 return;
-                //playsound(fx.death);
             end
         end
     end
@@ -329,7 +303,6 @@ loop
     if(x>92 && x< 214 && collision(type pit) && !collision(type crocs))
         dropdeath();
         return;
-        //playsound(fx.hit1);
     end
 
     if(above==0)
@@ -417,14 +390,19 @@ loop
             if(d%3==0)
                 y+=yx;
 
-                if(yx<8)
-                    yx++;
-                end
+                if(alive==1)
+                    graph=11;
 
-                graph=11;
+                    if(yx<8)
+                        yx++;
+                    end
+                end
             end
             x=x+dir;
-            if(y>groundy) y=groundy; end
+            if(y>=groundy)
+                y=groundy;
+                alive=1;
+            end
 
         end
 
@@ -489,6 +467,41 @@ begin
     end
 
 end
+
+process scorpion();
+
+
+begin
+
+x=sw/2;
+y=169+offy;
+
+graph=30;
+
+loop;
+if(framecount&1)
+    if(x<harryid.x)
+        x++;
+        flags=0;
+    end
+
+    if(x>harryid.x)
+        x--;
+        flags=1;
+    end
+
+    if(harryid.x!=x)
+            graph=30+((x/4)&1);
+    end
+end
+
+frame;
+
+end
+
+end
+
+
 
 function load_sounds();
 
