@@ -3,15 +3,23 @@ program pitfall;
 const
 sw=320;
 sh=240;
+fpsec=50;
 
 
 global
 vineid=0;
-
+sounds[10];
+framecount=0;
+soundspeed=256*((fpsec*1000)/50)/1000;
 
 begin
 
-set_fps(60,2);
+write_int(0,0,64,0,&soundspeed);
+
+
+sounds[0]=load_wav("pitfall/jump.wav",0); // jump
+sounds[1]=load_wav("pitfall/swing.wav",0); // swing
+set_fps(fpsec,2);
 
 load_fpg("pitfall/pitfall.fpg");
 set_mode(sw*1000+sh);
@@ -32,7 +40,7 @@ pit();
 
 
 loop
-
+framecount++;
 frame;
 
 end
@@ -70,8 +78,8 @@ begin
 draw_z=1024;
 //graph=9;
 
-//write_int(0,0,0,0,&x);
-//write_int(0,0,16,0,&y);
+write_int(0,0,0,0,&x);
+write_int(0,0,16,0,&y);
 
 
 //x1=320;
@@ -86,7 +94,7 @@ d1=draw(1,136,0,0,x1,y1,x,y);
 //rope();
 loop
 
-x=x1+sin(timer[0]*800)/15;
+x=x1+sin(framecount*2*700)/15;
 y=(-10-sh-x1)+cos(abs(x1-x)*180)/2;
 move_draw(d,56,15,x1,y1,x,y);
 move_draw(d1,56,15,x1+1,y1,x+1,y);
@@ -177,6 +185,10 @@ swinging=0;
 
 begin
 
+write_int(0,32,0,0,&x);
+write_int(0,32,16,0,&y);
+
+
 graph=10;
 
 x=60;
@@ -205,8 +217,10 @@ loop
 
     if(y==110)
 
-        if(key(_space))
+        if(key(_space) && yx!=-5)
             yx=-5;
+            playsound(0);
+
         end
 
         if(key(_right))
@@ -245,8 +259,11 @@ loop
 
     if(yx<10 && y<110 || yx==-5)
         if(yx<0 && y>vineid.y-10 && y<vineid.y+10
-            && x>vineid.x-5 && x<vineid.x+5)
-            swinging=1;
+            && x>vineid.x-10 && x<vineid.x+10)
+            if(swinging==0)
+                swinging=1;
+                playsound(1);
+            end
         else
             d++;
             if(d%3==0)
@@ -273,9 +290,6 @@ end
 
 process pit()
 
-private
-d=0;
-dd=0;
 begin
 
 x=(sw/2)-8;
@@ -284,8 +298,7 @@ graph=8;
 size=100;
 loop
 
-d++;
-if(d==130)
+if(framecount%130==1)
     if(size==100)
         while(size>0)
             size-=5;
@@ -297,13 +310,20 @@ if(d==130)
             frame;
         end
     end
-    //debug;
-    d=0;
 end
 
 frame;
 
 
 end
+
+end
+
+function playsound(num)
+
+begin
+
+x=sound(sounds[num],256,256);
+change_sound(x,256,soundspeed);
 
 end
