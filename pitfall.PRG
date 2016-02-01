@@ -658,7 +658,12 @@ loop
     if(x<16 || key(_q)) x=304; level_left(1+(3*(above==0))); end
     if(x>304 || key(_w)) x=16; level_right(1+(3*(above==0))); end
 
+    og=graph;
+    graph=10;
+    y-=2;
     crocid=collision(type object);
+    y+=2;
+    graph=og;
 
     if(crocid)
         if(treasure)
