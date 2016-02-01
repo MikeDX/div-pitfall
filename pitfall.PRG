@@ -216,18 +216,19 @@ process trees()
 
 begin
 //    size=0;
-    graph=5;
-    x=sw/2-8;
-    y=82+offy;
+//    graph=5;
+    x=sw/2;
+    y=80+offy;
  //   flags=4;
-    clone
-        graph=4;
+//    clone
+//        graph=4;
 //        z=-256;
-        x=sw/2;
-        y=30+offy;
-    end
+//        x=sw/2;
+//        y=30+offy;
+//    end
 
     loop
+    graph=50+((level>>5)&3);
 /*        if(key(_o))
             size=100;
         else
