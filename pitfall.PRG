@@ -253,10 +253,9 @@ loop
     graph=0;
     flags=0;
     y=144;
-    if(treasure>0)
+    if(treasure)
         flags=0;
         y=140;
-
         switch(level&3)
             case 0:
                 graph=44;
@@ -662,7 +661,7 @@ loop
     crocid=collision(type object);
 
     if(crocid)
-        if(treasure>0)
+        if(treasure)
             treasure=0;
             crocid.graph=0;
             playsound(fx.treasure);
@@ -1049,7 +1048,7 @@ begin
         case 5:  //shifting tar pit + treasure
             tarpit=1;
             shifting=1;
-            treasure=(level&3); // one of 4 types
+            treasure=1; // one of 4 types
             end
 
         case 6:  // shifting tarpit + vine
