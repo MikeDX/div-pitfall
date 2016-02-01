@@ -26,7 +26,14 @@ global
     holes=0;
     vine=0;
     crocs=0;
+    struct time
+        m=20;
+        s=0;
+    end
 
+    lives=2;
+
+    score=2000;
 
     level=0;
     bit[8];
@@ -51,7 +58,7 @@ begin
     set_fps(fpsec,2);
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
-    intro();
+    //intro();
 
     put(file,3,sw/2,sh/2);
 
@@ -73,9 +80,18 @@ process game()
 begin
 
     level=196;
+    score=2000;
+    time.m=20;
+    time.s=0;
+    lives=2;
+
     level_update();
 
     vineid=vineproc();
+
+    showtimer();
+    showscore();
+    showlives();
 
     // 1 of 4 different tree types
     trees();
@@ -95,46 +111,115 @@ begin
     // player-chasing scorpion (or walls)
     scorpion();
 
-harryid=harry();
-son.y=134;
+    harryid=harry();
+    son.y=134;
 //son.y=164+offy;
 
 loop
+    if(key(_enter))
+        level=196;
+        score=2000;
+        time.m=20;
+        time.s=0;
+        lives=2;
+        signal(harryid,s_kill_tree);
+        signal(type death, s_kill_tree);
+        signal(type dropdeath, s_kill_tree);
+        harryid=harry();
+        son.y=134;
+        alive=1;
+        framecount=0;
+        level_update();
+
+        //lives=2;
+        //level=192
+    end
+
     frame;
 end
 
 end
 
 
+process showtimer();
+
+begin
+y=45;
+
+loop
+
+    if(framecount&fpsec==0)
+        time.s--;
+        if(time.s<0)
+            time.s=59;
+            time.m--;
+        end
+    end
+
+    frame;
+end
+
+
+end
+
+
+process showscore();
+
+begin
+
+end
+
+
+
+process showlives();
+
+begin
+
+    x=36;
+    y=45;
+
+    loop
+
+        graph=71+(2-lives);
+
+        frame;
+    end
+
+end
+
+
+
 process vineproc()
 
 
 private
-x1=sw/2-8;
-y1=30+offy;
 
-d=0;
-d1=0;
+    x1=sw/2-8;
+    y1=30+offy;
+
+    d=0;
+    d1=0;
 
 
 begin
-region=1;
-draw_z=257;
+    //region=1;
+    draw_z=257;
 
-d=draw(1,60,0,0,x1,y1,x,y);
-d1=draw(1,60,0,0,x1,y1,x,y);
+    d=draw(1,60,0,0,x1,y1,x,y);
+    d1=draw(1,60,0,0,x1,y1,x,y);
 
-loop
-if(vine)
-x=x1+sin(framecount*2*700)/15;
-y=-375+cos(abs(x1-x)*180)/2;
-else
-x=x1;y=y1;
-end
-move_draw(d,60,15,x1,y1,x,y);
-move_draw(d1,60,15,x1+1,y1,x+1,y);
+    loop
 
-frame;
+    if(vine)
+        x=x1+sin(framecount*2*700)/15;
+        y=-375+cos(abs(x1-x)*180)/2;
+    else
+        x=x1;y=y1;
+    end
+    move_draw(d,60,15,x1,y1,x,y);
+    move_draw(d1,60,15,x1+1,y1,x+1,y);
+
+    frame;
 
 end
 
@@ -398,8 +483,15 @@ begin
     frame;
 
 end
-    harryid=harry();
-    son.y=y-30;
+    lives--;
+    if(lives>=0)
+        harryid=harry();
+        son.y=y-30;
+    else
+        loop
+            frame;
+        end
+    end
 
 end
 
@@ -425,8 +517,10 @@ begin
         frame(200);
 
     end
-
-    harryid=harry();
+    lives--;
+    if(lives>=0)
+        harryid=harry();
+    end
 
 end
 
@@ -918,6 +1012,7 @@ private
 
 psound=0;
 begin
+    //write_int(0,0,0,0,&psound);
 
     if(is_playing_sound(psound))
         stop_sound(psound);
