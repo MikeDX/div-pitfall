@@ -76,16 +76,9 @@ end
 
 
 process game()
-
+private
+firstrun=1;
 begin
-
-    level=196;
-    score=2000;
-    time.m=20;
-    time.s=0;
-    lives=2;
-
-    level_update();
 
     vineid=vineproc();
 
@@ -113,21 +106,24 @@ begin
 
     harryid=harry();
     son.y=134;
-//son.y=164+offy;
 
 loop
-    if(key(_enter))
+    if(key(_enter) || firstrun)
+        alive=0;
         level=196;
         score=2000;
         time.m=20;
         time.s=0;
         lives=2;
+        firstrun=0;
+
         signal(harryid,s_kill_tree);
         signal(type death, s_kill_tree);
         signal(type dropdeath, s_kill_tree);
+
         harryid=harry();
         son.y=134;
-        alive=1;
+        //alive=1;
         framecount=0;
         level_update();
 
@@ -142,19 +138,34 @@ end
 
 
 process showtimer();
-
+private
+string timestring="";
 begin
 y=45;
 
+write(0,0,8,0,timestring);
+
 loop
 
-    if(framecount&fpsec==0)
+    if(framecount%fpsec==fpsec-1)
         time.s--;
         if(time.s<0)
             time.s=59;
             time.m--;
         end
+        while(framecount%fpsec==0)
+            frame;
+        end
     end
+    timestring="";
+    if(time.m<10)
+    timestring+="0";
+    end
+    timestring+=itoa(time.m)+":";
+    if(time.s<10)
+    timestring+="0";
+    end
+    timestring+=itoa(time.s);
 
     frame;
 end
@@ -166,6 +177,8 @@ end
 process showscore();
 
 begin
+
+write_int(0,0,0,0,&score);
 
 end
 
@@ -325,7 +338,7 @@ loop
     y=144;
     if(treasure)
         flags=0;
-        y=140;
+        y=144;
         switch(level&3)
             case 0:
                 graph=44;
@@ -553,6 +566,12 @@ begin
 //    write_int(0,0,16,0,&groundy);
 
     z=-40;
+    if(lives==2)
+        while(!key(_left) && !key(_right) && !key(_space))
+            frame;
+        end
+        alive=1;
+    end
 loop
     if(holes==0)
         z=-40;
@@ -756,12 +775,14 @@ loop
 
     if(crocid)
         if(treasure)
+            score+=(treasure+2)*1000;
             treasure=0;
             crocid.graph=0;
             playsound(fx.treasure);
         else
             if(crocid.graph==19 || crocid.graph==20)
                 graph=22;
+                score--;
                 playsound(fx.hit1);
             else
                 death();
@@ -833,6 +854,7 @@ loop
                     graph=10;
                     groundy=boty;
                     playsound(fx.fall);
+                    score-=100;
 
                     while(y<boty)
                         y++;
@@ -935,7 +957,7 @@ loop;
         oldlevel=level;
     end
 
-    if(alive==0)
+    if(alive==0 && harryid!=0)
         if(harryid.y<y-10 && x<sw/2)
             x=sw/2;
         end
