@@ -140,32 +140,61 @@ end
 process showtimer();
 private
 string timestring="";
+string oldstring="xx:xx";
+om=0;
+os=0;
 begin
 y=45;
 
-write(0,0,8,0,timestring);
+//write(0,0,8,0,timestring);
 
 loop
 
+    if(om!=time.m || os!=time.s)
+    //strcmp(oldstring,timestring))
+        x=113;
+        y=18;
+
+        map_put(file,4,60+(time.s%10),x,y);
+        map_put(file,4,60+(time.s/10)%10,x-16,y);
+
+        x-=48;
+
+        map_put(file,4,60+(time.m%10),x,y);
+        map_put(file,4,60+(time.m/10)%10,x-16,y);
+        oldstring=timestring;
+        om=time.m;
+        os=time.s;
+    end
+
+
     if(framecount%fpsec==fpsec-1)
         time.s--;
+
         if(time.s<0)
             time.s=59;
             time.m--;
         end
-        while(framecount%fpsec==0)
+
+        while(framecount%fpsec==fpsec-1)
             frame;
         end
+ /*
+        timestring="";
+
+        if(time.m<10)
+            timestring+="0";
+        end
+
+        timestring+=itoa(time.m)+":";
+
+        if(time.s<10)
+            timestring+="0";
+        end
+
+        timestring+=itoa(time.s);
+   */
     end
-    timestring="";
-    if(time.m<10)
-    timestring+="0";
-    end
-    timestring+=itoa(time.m)+":";
-    if(time.s<10)
-    timestring+="0";
-    end
-    timestring+=itoa(time.s);
 
     frame;
 end
@@ -176,9 +205,36 @@ end
 
 process showscore();
 
+private
+    oldscore=0;
+    len=0;
+    string strscore="";
 begin
 
-write_int(0,0,0,0,&score);
+  //  write_int(0,0,0,0,&score);
+  //  write_int(0,40,0,0,&len);
+    loop
+
+        if(score!=oldscore)
+            oldscore=score;
+            strscore=itoa(score);
+            len=strlen(strscore);
+            x=113;
+            y=5;
+            while(len>0)
+                map_put(file,4,60+(oldscore%10),x,y);
+                //,0,100,4);
+                oldscore=oldscore/10;
+                x-=16;
+                len--;
+            end
+            oldscore=score;
+        end
+
+        frame;
+
+    end
+
 
 end
 
@@ -305,6 +361,7 @@ oldlevel;
 begin
     x=sw/2;
     y=80+offy;
+
     clone
         graph=4;
         y=30+offy;
@@ -335,10 +392,8 @@ loop
     x=249;
     graph=0;
     flags=0;
-    y=144;
     if(treasure)
         flags=0;
-        y=144;
         switch(level&3)
             case 0:
                 graph=44;
@@ -389,11 +444,9 @@ process path();
 
 begin
 
-//    graph=7;
     x=sw/2;
     y=151;
     z=256;
-    //flags=4;
 
     loop
         graph=40+holes;
