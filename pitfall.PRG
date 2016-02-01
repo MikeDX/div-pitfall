@@ -121,7 +121,8 @@ begin
     scorpion();
 
 harryid=harry();
-son.y=134;
+//son.y=134;
+son.y=164+offy;
 
 loop
     frame;
@@ -245,13 +246,24 @@ x=249;
 y=144;
 
 loop
+    x=249;
     graph=0;
-    if(snake)
+    flags=0;
+    if(snake==1)
         graph=34+(framecount&1);
     end
 
+    if(snake==2)
+        size=200;
+        graph=16+rand(0,1);
+    end
+
     if(logs>0)
-        graph=20;
+        if(logs<4)
+            graph=20-((framecount/4)&1);
+            x=offx+6+288-(framecount%288);
+        end
+
     end
 
     frame;
@@ -265,7 +277,7 @@ process path();
 
 begin
 
-    graph=7;
+    //graph=7;
     x=sw/2;
     y=151;
     //flags=4;
@@ -286,6 +298,28 @@ begin
 
 end
 
+process death()
+private
+    t=0;
+begin
+alive=0;
+x=father.x;
+y=father.y;
+graph=father.graph;
+flags=father.flags;
+
+playsound(fx.death);
+//debug;
+while(t<fpsec*2)
+t++;
+frame;
+end
+
+harryid=harry();
+son.y=y-30;
+end
+
+
 
 process dropdeath()
 
@@ -297,7 +331,7 @@ graph=father.graph;
 flags=father.flags;
 father.graph=0;
 //signal(father.father,s_sleep_tree);
-signal(father,s_kill);
+//signal(father,s_kill);
 //frame;
 define_region(2,x-10,y-10,20,20);
 region=2;
@@ -310,7 +344,7 @@ frame(200);
 
 end
 
-harry();
+harryid=harry();
 
 end
 
@@ -325,7 +359,7 @@ private
     swinging=0;
     ladder=0;
     above=1;
-
+    og=0;
     topy=109+offy;
 
     boty=164+offy;
@@ -343,6 +377,12 @@ begin
 loop
 
     crocid=collision(type crocproc);
+
+    if(y>topy)
+        above=0;
+    else
+        above=1;
+    end
 
     if(crocid)
         if(crocid.graph==33)
@@ -367,6 +407,16 @@ loop
 
     if(above==0)
         groundy=boty;
+        if(holes==0)
+            og=graph;
+            graph=10;
+            crocid=collision(type scorpion);
+            graph=og;
+            if(crocid)
+                death();
+                return;
+            end
+        end
     else
         groundy=topy;
     end
@@ -561,13 +611,17 @@ if(holes==0)
     y=168+offy;
 
     if(framecount&1 && alive)
-        if(x<harryid.x)
+        if(x<harryid.x-5)
             x++;
-            flags=0;
         end
 
-        if(x>harryid.x)
+        if(x>harryid.x+5)
             x--;
+        end
+
+        if(x<harryid.x)
+            flags=0;
+        else
             flags=1;
         end
 
@@ -723,7 +777,7 @@ begin
     if(crocs==0 && treasure==0)
         x=level&7;
         if(x<6)
-            logs=x;
+            logs=x+1;
         else
             if(x==6)
                 snake=2;
