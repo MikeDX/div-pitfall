@@ -395,6 +395,7 @@ z-=30;
 
 loop
     x=249;
+    y=144;
     graph=0;
     flags=0;
     if(treasure)
@@ -637,7 +638,7 @@ loop
         z=0;
     end
 
-    crocid=collision(type crocproc);
+   // crocid=collision(type crocproc);
 
     if(y>topy)
         above=0;
@@ -645,6 +646,7 @@ loop
         above=1;
     end
 
+    /*
     if(crocid)
         if(crocid.graph==33)
             if(x<crocid.x+2)
@@ -654,17 +656,7 @@ loop
             end
         end
     end
-
-    if(x>92 && x< 214 && collision(type pit))
-        y+=2;
-        crocid=collision(type crocproc);
-        y-=2;
-
-        if(!crocid)
-            dropdeath();
-            return;
-        end
-    end
+    */
 
     if(above==0)
         groundy=boty;
@@ -727,6 +719,7 @@ loop
             else
                 dir=-1;
             end
+           /*
             if(key(_left))
                 dir=-1;
                 flags=1;
@@ -736,6 +729,7 @@ loop
                 dir=1;
                 flags=0;
             end
+            */
         end
     end
 
@@ -750,27 +744,39 @@ loop
         if(key(_right))
             flags=0;
             dir=1;
-            x=x+1;
-            if(x%3==0)
-                walk=walk+1;
-                if(walk==6) walk=1; end
-            end
+            if(yx>0)
+                x=x+1;
 
-            graph=10+walk;
+                if(x%3==0)
+                    walk=walk+1;
+
+                    if(walk==6)
+                        walk=1;
+                    end
+
+                end
+
+                graph=10+walk;
+
+            end
         end
 
 
         if(key(_left))
             flags=1;
             dir=-1;
-            x=x-1;
+            if(yx>0)
+                x=x-1;
 
-            if(x%3==0)
-                walk=walk+1;
-                if(walk==6) walk=1; end
+                if(x%3==0)
+                    walk=walk+1;
+                    if(walk==6)
+                        walk=1;
+                    end
+                end
+
+                graph=10+walk;
             end
-
-            graph=10+walk;
 
         end
 
@@ -781,6 +787,25 @@ loop
         end
     end
 
+    og=graph;
+    graph=10;
+
+    if(y==topy && x>92 && x< 214 && collision(type pit))
+        y+=2;
+        crocid=collision(type crocproc);
+        y-=2;
+        if(crocid)
+            if(crocid.graph==33 && x<crocid.x+2)
+                dropdeath();
+                return;
+            end
+        else
+            dropdeath();
+            return;
+        end
+    end
+
+    graph=og;
 
     if(y<groundy || yx==-4)
     //!collision(type ladderproc))
@@ -872,8 +897,12 @@ loop
                 end
 
                 if(y!=topy && collision(type object))
+                    if(score>0)
+                        score--;
+                    end
+
                     playsound(fx.hit1);
-                    y+=8;
+                    y+=2;
                 end
 
                 if(y>topy && key(_up))
@@ -1157,7 +1186,7 @@ private
 scroll_map=0;
 
 begin
-return;
+//return;
 
 scroll_map=new_map(304,191,152,95,1);
 
