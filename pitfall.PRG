@@ -632,6 +632,7 @@ loop
         end
 
     end
+
     if(x<16 || key(_q)) x=304; level_left(1+(3*(above==0))); end
     if(x>304 || key(_w)) x=16; level_right(1+(3*(above==0))); end
 
@@ -709,7 +710,7 @@ loop
 
             if(y==topy && yx>=0)
 
-                if(x>crocid.x-(4+2*(crocid.graph==38)) && x<crocid.x+4+2*(crocid.graph==38))
+                if(x>crocid.x-(5+4*(crocid.graph==38)) && x<crocid.x+5+4*(crocid.graph==38))
 
                     graph=10;
 
