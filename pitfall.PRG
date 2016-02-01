@@ -158,34 +158,37 @@ process crocproc()
 
 begin
 
-y=117+offy;
-x=sw/2-9;
-clone
-x-=32;
-end
-clone
-x+=32;
+    y=117+offy;
+    x=sw/2-9;
+
+    clone
+        x-=32;
+    end
+
+    clone
+        x+=32;
+    end
+
+    graph=32;
+
+    loop
+        if(!crocs)
+            size=0;
+        else
+            size=100;
+
+            if(framecount%120<60)
+                graph=32;
+            else
+                graph=33;
+            end
+        end
+
+        frame;
+    end
+
 end
 
-graph=32;
-
-loop
-if(!crocs)
-size=0;
-else
-size=100;
-end
-
-if(framecount%120<60)
-graph=32;
-else
-graph=33;
-end
-
-frame;
-end
-
-end
 
 process rope();
 
@@ -238,6 +241,7 @@ begin
 
 x=249;
 y=144;
+z-=10;
 
 loop
     x=249;
@@ -289,15 +293,47 @@ process ladderproc()
 
 begin
 
+x=sw/2;
+y=149;
+graph=18;
+z--;
+
+clone
+graph=39;
 x=sw/2-8;
+y=155;
+z++;
+end
+
+clone
+graph=37;
 y=175;
+x=sw/2-8;
+z++;
+end
+
+clone
+graph=38;
+y=154;
+x=100;
+end
+
+clone
+graph=38;
+y=154;
+x=204;
+end
+
 
 loop
+    size=0;
 
-    if(holes>0)
-        graph=37;
+    if(holes==3)
+        size=100;
     else
-        graph=0;
+        if(holes==1 && (graph == 39 || graph == 37))
+            size=100;
+        end
     end
 
     frame;
@@ -553,10 +589,14 @@ loop
         end
     end
 
+    if(collision(type ladderproc))
+        graph=36;
+    end
 
-   // while(!(SHIFT_STATUS) && (key(_q) || key(_w)))
-   //     frame;
-   // end
+
+    while((key(_q) || key(_w)))
+        frame;
+    end
     //end
 
 
