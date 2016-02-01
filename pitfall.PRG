@@ -46,16 +46,6 @@ global
     soundspeed=256*((fpsec*1000)/50)/1000;
 
 begin
-    write_int(0,0,0,0,&tarpit);
-    write_int(0,0,8,0,&shifting);
-    write_int(0,0,16,0,&snake);
-    write_int(0,0,24,0,&wall);
-    write_int(0,0,32,0,&bg);
-    write_int(0,0,40,0,&treasure);
-    write_int(0,0,48,0,&logs);
-    write_int(0,0,56,0,&holes);
-    write_int(0,0,64,0,&vine);
-    write_int(0,0,72,0,&crocs);
 
     load_sounds();
     set_fps(fpsec,2);
@@ -64,7 +54,7 @@ begin
 
     put(file,3,sw/2,sh/2);//+offy-1);
 
-    write_int(0,0,64,0,&level);
+//    write_int(0,0,64,0,&level);
 
 //graph=3;
 //region=1;
@@ -105,6 +95,7 @@ begin
 
     // 1 of 3 paths (solid, ladder, ladder + holes)
     path();
+    ladderproc();
 
     // pit or quicksand
     pit();
@@ -121,8 +112,8 @@ begin
     scorpion();
 
 harryid=harry();
-//son.y=134;
-son.y=164+offy;
+son.y=134;
+//son.y=164+offy;
 
 loop
     frame;
@@ -254,12 +245,13 @@ loop
     end
 
     if(snake==2)
-        size=200;
+        //size=200;
         graph=16+rand(0,1);
     end
 
     if(logs>0)
-        if(logs<4)
+        graph=20;
+        if(logs<5)
             graph=20-((framecount/4)&1);
             x=offx+6+288-(framecount%288);
         end
@@ -277,14 +269,38 @@ process path();
 
 begin
 
-    //graph=7;
+//    graph=7;
     x=sw/2;
     y=151;
+    z=256;
     //flags=4;
 
     loop
+        graph=40+holes;
         frame;
     end
+
+end
+
+process ladderproc()
+
+begin
+
+x=sw/2-8;
+y=174;
+
+loop
+
+    if(holes>0)
+        graph=37;
+    else
+        graph=0;
+    end
+
+    frame;
+
+end
+
 
 end
 
@@ -410,7 +426,9 @@ loop
         if(holes==0)
             og=graph;
             graph=10;
+            y-=3;
             crocid=collision(type scorpion);
+            y+=3;
             graph=og;
             if(crocid)
                 death();
@@ -448,8 +466,8 @@ loop
 
     if(y==groundy)
 
-        if(key(_space) && yx!=-5)
-            yx=-5;
+        if(key(_space) && yx!=-4)
+            yx=-4;
             playsound(fx.jump);
 
         end
@@ -488,7 +506,7 @@ loop
         end
     end
 
-    if(y<groundy || yx==-5)
+    if(y<groundy || yx==-4)
         if(yx<0 && y>vineid.y-10 && y<vineid.y+15
             && x>vineid.x-10 && x<vineid.x+10)
             if(swinging==0)
@@ -517,8 +535,8 @@ loop
         end
 
     end
-    if(x<16 || key(_q)) x=304; level_left(); end
-    if(x>304 || key(_w)) x=16; level_right(); end
+    if(x<16 || key(_q)) x=304; level_left(1+(3*(above==0))); end
+    if(x>304 || key(_w)) x=16; level_right(1+(3*(above==0))); end
 
     while(key(_q) || key(_w))
         frame;
@@ -601,6 +619,13 @@ y=168+offy;
 graph=30;
 
 loop;
+    if(alive==0)
+        if(harryid.y<y-10 && x<sw/2)
+        // && harryid.y<y)
+            x=sw/2;
+        end
+
+    end
 
 if(holes==0)
     if(graph==21)
@@ -674,29 +699,35 @@ end
 
 // pitfall levels LFSR
 
-function level_right()
+function level_right(count)
 
 private
     t;
 begin
-    t=(level>>7) XOR (level>>5) XOR (level>>4) XOR (level>>3);
-    level = (level<<1)%256;
-    level |= (t & 1);
+    while(count>0)
+        t=(level>>7) XOR (level>>5) XOR (level>>4) XOR (level>>3);
+        level = (level<<1)%256;
+        level |= (t & 1);
+        count--;
+    end
 
     level_update();
 
 end
 
 
-function level_left()
+function level_left(count)
 
 private
     t;
 begin
-    t=(level>>6) XOR (level >>5) XOR ( level >> 4) XOR level;
+    while(count>0)
+        t=(level>>6) XOR (level >>5) XOR ( level >> 4) XOR level;
 
-    level = (level>>1);
-    level |= ((t<<7)%256);
+        level = (level>>1);
+        level |= ((t<<7)%256);
+        count--;
+    end
 
     level_update();
 
