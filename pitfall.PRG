@@ -243,12 +243,20 @@ begin
 
 x=249;
 y=144;
-z-=10;
+z-=30;
 
 loop
     x=249;
     graph=0;
     flags=0;
+    y=144;
+    if(treasure>0)
+        graph=2;
+        flags=1;
+        y=140;
+    end
+
+
     if(snake==1)
         graph=34+(framecount&1);
     end
@@ -263,6 +271,7 @@ loop
         if(logs<5)
             graph=20-((framecount/4)&1);
             x=offx+6+288-(framecount%288);
+            y=144+(x%16<3);
         end
 
     end
@@ -619,12 +628,18 @@ loop
     crocid=collision(type object);
 
     if(crocid)
-        if(crocid.graph==19 || crocid.graph==20)
-            graph=22;
-            playsound(fx.hit1);
+        if(treasure>0)
+            treasure=0;
+            crocid.graph=0;
+            playsound(fx.treasure);
         else
-            death();
-            return;
+            if(crocid.graph==19 || crocid.graph==20)
+                graph=22;
+                playsound(fx.hit1);
+            else
+                death();
+                return;
+            end
         end
     end
 
@@ -644,14 +659,19 @@ loop
                     y++;
                 end
 
+                if(collision(type object))
+                    playsound(fx.hit1);
+                    y+=8;
+                end
+
                 if(y>topy && key(_up))
-                    if(y>topy+5)
+                    if(y>topy+15)
                         graph=36;
                         x=152;
                         y--;
                     end
 
-                    if(y<topy+10)
+                    if(y<topy+16)
                         if(key(_left) || key(_right))
                             y=topy;
                             yx=-4;
@@ -672,14 +692,14 @@ loop
                 end
 
                 if(y!=topy && y!=boty)
-                    frame;
+                    frame(200);
                 end
                 until(y==topy || y==boty);
             end
 
-            if(y==topy && !key(_down) && !key(_up))
+            if(y==topy && yx>=0)
 
-                if(x>crocid.x-(4+4*(crocid.graph==38)) && x<crocid.x+4+4*(crocid.graph==38))
+                if(x>crocid.x-(4+2*(crocid.graph==38)) && x<crocid.x+4+2*(crocid.graph==38))
 
                     graph=10;
 
@@ -841,6 +861,7 @@ begin
     fx.hit2=load_wav("pitfall/hit2.wav",0);
     fx.jump=load_wav("pitfall/jump.wav",0);
     fx.swing=load_wav("pitfall/swing.wav",0);
+    fx.treasure=load_wav("pitfall/treasure.wav",0);
 
 end
 
