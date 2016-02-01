@@ -430,11 +430,10 @@ begin
     flags=father.flags;
     father.graph=0;
     z=-21;
+
     define_region(2,x-10,y-10,20,20);
     region=2;
     playsound(fx.death);
-
-    harryid=harry();
 
     while(y<150)
         y++;
@@ -442,6 +441,7 @@ begin
 
     end
 
+    harryid=harry();
 
 end
 
@@ -469,8 +469,9 @@ begin
     x=24+offx;
     y=offy+25;
 
-    //write_int(0,0,0,0,&x);
-    //write_int(0,0,8,0,&y);
+//    write_int(0,0,0,0,&x);
+//    write_int(0,0,8,0,&y);
+//    write_int(0,0,16,0,&groundy);
 
     z=-40;
 loop
@@ -638,11 +639,13 @@ loop
             if(d%3==0)
                 y+=yx;
 
-                if(alive==1)
+                if(alive==1 || y>groundy-32)
+                    //if(
                     graph=11;
-
-                    if(yx<8)
-                        yx++;
+                    if(alive==1)
+                        if(yx<8)
+                            yx++;
+                        end
                     end
                 end
             end
@@ -749,11 +752,16 @@ loop
                 if(x>crocid.x-(5+4*(crocid.graph==38)) && x<crocid.x+5+4*(crocid.graph==38))
 
                     graph=10;
-
+                    groundy=boty;
                     playsound(fx.fall);
 
                     while(y<boty)
                         y++;
+
+                        if(y>groundy-24)
+                            graph=11;
+                        end
+
                         frame;
                     end
 
@@ -812,7 +820,7 @@ begin
             end
         end
 
-        if(pdir!=0)
+        if(pdir!=0 && alive)
             if((pdir<0 && psize>0) || (pdir>0 && psize<100))
                 psize+=pdir;
             end
