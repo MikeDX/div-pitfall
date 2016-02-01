@@ -253,9 +253,26 @@ loop
     flags=0;
     y=144;
     if(treasure>0)
-        graph=2;
-        flags=1;
+        flags=0;
         y=140;
+
+        switch(level&3)
+            case 0:
+                graph=44;
+            end
+
+            case 1:
+                graph=47+rand(0,1);
+            end
+
+            case 2:
+                graph=45+rand(0,1);
+            end
+
+            case 3:
+                graph=49;
+            end
+        end
     end
 
 
@@ -675,7 +692,7 @@ loop
                     y++;
                 end
 
-                if(collision(type object))
+                if(y!=topy && collision(type object))
                     playsound(fx.hit1);
                     y+=8;
                 end
@@ -906,6 +923,7 @@ begin
     end
 
     level_update();
+    scrolloff(1);
 
 end
 
@@ -924,6 +942,45 @@ begin
     end
 
     level_update();
+    scrolloff(-1);
+
+end
+
+process scrolloff(dir)
+
+private
+
+scroll_map=0;
+
+begin
+
+scroll_map=new_map(304,191,152,95,1);
+
+screen_copy(file,0,23,0,0,320,240);
+
+map_put(file,scroll_map,23,152,95);
+
+graph=scroll_map;
+
+x=sw/2;
+y=sh/2;
+size=100;
+z=-50;
+//graph=23;
+//debug;
+define_region(3,offx,0,304,sh);
+region=3;
+flags=4;
+//debug;
+
+while(!out_region(id,3))
+y+=dir*8;
+size-=4;
+//y+=2;
+frame;
+end
+//debug;
+unload_map(scroll_map);
 
 end
 
@@ -1012,7 +1069,5 @@ begin
             end
         end
     end
-
-
 
 end
