@@ -58,7 +58,7 @@ begin
     set_fps(fpsec,2);
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
-    //intro();
+    intro();
 
     put(file,3,sw/2,sh/2);
 
@@ -111,11 +111,11 @@ loop
     if(key(_enter) || firstrun)
         alive=0;
         level=196;
-        score=2000;
         time.m=20;
         time.s=0;
         lives=2;
         firstrun=0;
+        score=2000;
 
         signal(harryid,s_kill_tree);
         signal(type death, s_kill_tree);
@@ -157,7 +157,7 @@ loop
 
         map_put(file,4,60+(time.s%10),x,y);
         map_put(file,4,60+(time.s/10)%10,x-16,y);
-
+        map_put(file,4,70,x-32,y);
         x-=48;
 
         map_put(file,4,60+(time.m%10),x,y);
@@ -206,7 +206,7 @@ end
 process showscore();
 
 private
-    oldscore=0;
+    oldscore=999;
     len=0;
     string strscore="";
 begin
@@ -228,6 +228,10 @@ begin
                 x-=16;
                 len--;
             end
+            map_put(file,4,73,x,y);
+            map_put(file,4,73,x-16,y);
+
+
             oldscore=score;
         end
 
@@ -246,6 +250,7 @@ begin
 
     x=36;
     y=45;
+    z=-256;
 
     loop
 
@@ -835,7 +840,11 @@ loop
         else
             if(crocid.graph==19 || crocid.graph==20)
                 graph=22;
-                score--;
+
+                if(score>0)
+                    score--;
+                end
+
                 playsound(fx.hit1);
             else
                 death();
@@ -907,7 +916,12 @@ loop
                     graph=10;
                     groundy=boty;
                     playsound(fx.fall);
-                    score-=100;
+                    if(score>100)
+                        score-=100;
+                    else
+                        score=0;
+                    end
+
 
                     while(y<boty)
                         y++;
