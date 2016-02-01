@@ -613,6 +613,7 @@ private
     boty=164+offy;
     groundy;
     crocid=0;
+    lastspace=0;
 
 begin
     graph=10;
@@ -735,10 +736,13 @@ loop
 
     if(y==groundy)
 
-        if(key(_space) && yx!=-4)
+        if(key(_space) && yx!=-4 && !lastspace)
             yx=-4;
             playsound(fx.jump);
-
+            lastspace=1;
+        end
+        if(!key(_space))
+            lastspace=0;
         end
 
         if(key(_right))
