@@ -52,7 +52,9 @@ begin
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
 
-    put(file,3,sw/2,sh/2);//+offy-1);
+    put(file,3,sw/2,sh/2);
+
+    //+offy-1);
 
 //    write_int(0,0,64,0,&level);
 
@@ -220,11 +222,17 @@ oldlevel;
 begin
     x=sw/2;
     y=80+offy;
+    clone
+        graph=4;
+        y=30+offy;
+    end
 
     loop
         if(level!=oldlevel)
-            graph=50+((level>>6)&3);
-            oldlevel=level;
+            if(graph!=4)
+                graph=50+((level>>6)&3);
+                oldlevel=level;
+            end
         end
 
         frame;
