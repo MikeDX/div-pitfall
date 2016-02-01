@@ -489,10 +489,20 @@ loop
 
     if(above==0)
         groundy=boty;
-        og=graph;
-        graph=10;
-        graph=og;
+
+        if(holes==0)
+            og=graph;
+            y-=3;
+            graph=10;
+        end
+
         crocid=collision(type scorpion);
+
+        if(holes==0)
+            y+=3;
+            graph=og;
+        end
+        //crocid=collision(type scorpion);
 
         if(crocid)
             if(holes==0) // hit a scorpion
