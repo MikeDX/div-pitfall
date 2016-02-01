@@ -413,7 +413,6 @@ begin
     frame;
 
 end
-    // respawn harry
     harryid=harry();
     son.y=y-30;
 
@@ -435,13 +434,14 @@ begin
     region=2;
     playsound(fx.death);
 
+    harryid=harry();
+
     while(y<150)
         y++;
         frame(200);
 
     end
 
-    harryid=harry();
 
 end
 
@@ -624,6 +624,7 @@ loop
         end
     end
 
+
     if(y<groundy || yx==-4)
     //!collision(type ladderproc))
         if(yx<0 && y>vineid.y-10 && y<vineid.y+30
@@ -658,12 +659,18 @@ loop
     if(x<16 || key(_q)) x=304; level_left(1+(3*(above==0))); end
     if(x>304 || key(_w)) x=16; level_right(1+(3*(above==0))); end
 
-    og=graph;
-    graph=10;
-    y-=2;
-    crocid=collision(type object);
-    y+=2;
-    graph=og;
+
+    if(logs==0 && treasure==0)
+
+        og=graph;
+        y-=2;
+        crocid=collision(type object);
+        y+=2;
+        graph=og;
+
+    else
+        crocid=collision(type object);
+    end
 
     if(crocid)
         if(treasure)
@@ -680,6 +687,8 @@ loop
             end
         end
     end
+
+
 
     if(holes>0 && y==topy || y==boty)
         og=graph;
