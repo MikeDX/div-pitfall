@@ -214,27 +214,19 @@ end
 
 process trees()
 
+private
+oldlevel;
+
 begin
-//    size=0;
-//    graph=5;
     x=sw/2;
     y=80+offy;
- //   flags=4;
-//    clone
-//        graph=4;
-//        z=-256;
-//        x=sw/2;
-//        y=30+offy;
-//    end
 
     loop
-    graph=50+((level>>5)&3);
-/*        if(key(_o))
-            size=100;
-        else
-            size=0;
+        if(level!=oldlevel)
+            graph=50+((level>>6)&3);
+            oldlevel=level;
         end
- */
+
         frame;
     end
 
@@ -819,6 +811,8 @@ end
 
 process scorpion();
 
+private
+oldlevel;
 
 begin
 
@@ -828,9 +822,13 @@ y=168+offy;
 graph=30;
 
 loop;
+    if(level!=oldlevel)
+        x=sw/2;
+        oldlevel=level;
+    end
+
     if(alive==0)
         if(harryid.y<y-10 && x<sw/2)
-        // && harryid.y<y)
             x=sw/2;
         end
 
@@ -954,6 +952,7 @@ private
 scroll_map=0;
 
 begin
+return;
 
 scroll_map=new_map(304,191,152,95,1);
 
