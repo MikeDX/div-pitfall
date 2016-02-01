@@ -550,15 +550,20 @@ begin
 
     playsound(fx.death);
 
-    while(t<fpsec*2)
-        t++;
-    frame;
+    frame(fps*200);
 
-end
     lives--;
     if(lives>=0)
         harryid=harry();
         son.y=y-30;
+        if(y>160)
+            define_region(2,18,167,26,32);
+        else
+            define_region(2,24,73,35,95);
+        end
+
+        harryid.region=2;
+
     else
         loop
             frame;
@@ -584,15 +589,19 @@ begin
     region=2;
     playsound(fx.death);
 
-    while(y<150)
+    while(y<160)
         y++;
-        frame(200);
-
+        frame;
     end
+
+    frame(fps*25);
+
     lives--;
     if(lives>=0)
         harryid=harry();
     end
+    define_region(2,24,73,35,95);
+    harryid.region=2;
 
 end
 
@@ -735,7 +744,7 @@ loop
     end
 
     if(y==groundy)
-
+        region=0;
         if(key(_space) && yx!=-4 && !lastspace)
             yx=-4;
             playsound(fx.jump);
@@ -830,6 +839,8 @@ loop
                     if(alive==1)
                         if(yx<8)
                             yx++;
+                        else
+
                         end
                     end
                 end
@@ -958,12 +969,14 @@ loop
 
                     while(y<boty)
                         y++;
-
                         if(y>groundy-24)
                             graph=11;
                         end
 
                         frame;
+
+                        //region=0;
+
                     end
 
                  end
