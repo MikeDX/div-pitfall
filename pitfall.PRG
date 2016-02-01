@@ -140,7 +140,7 @@ d1=draw(1,60,0,0,x1,y1,x,y);
 loop
 if(vine)
 x=x1+sin(framecount*2*700)/15;
-y=-379+ cos(abs(x1-x)*180)/2;
+y=-375+cos(abs(x1-x)*180)/2;
 else
 x=x1;y=y1;
 end
@@ -171,6 +171,8 @@ begin
         end
     end
 
+    //write_int(0,x,y+16,4,&x);
+
     graph=32;
 
     loop
@@ -179,7 +181,7 @@ begin
         else
             size=100;
 
-            if(framecount%120<60)
+            if(framecount%200<100)
                 graph=32;
             else
                 graph=33;
@@ -411,6 +413,7 @@ begin
     graph=father.graph;
     flags=father.flags;
     father.graph=0;
+    z=-21;
     define_region(2,x-10,y-10,20,20);
     region=2;
     playsound(fx.death);
@@ -449,8 +452,9 @@ begin
     x=24+offx;
     y=offy+25;
 
-//    write_int(0,0,0,0,&x);
-//    write_int(0,0,8,0,&y);
+    //write_int(0,0,0,0,&x);
+    //write_int(0,0,8,0,&y);
+
     z=-40;
 loop
     if(holes==0)
@@ -469,7 +473,8 @@ loop
 
     if(crocid)
         if(crocid.graph==33)
-            if(x<crocid.x+5)
+            if(x<crocid.x+2)
+                //debug;
                 dropdeath();
                 return;
             end
@@ -604,7 +609,7 @@ loop
 
     if(y<groundy || yx==-4)
     //!collision(type ladderproc))
-        if(yx<0 && y>vineid.y-10 && y<vineid.y+20
+        if(yx<0 && y>vineid.y-10 && y<vineid.y+30
             && x>vineid.x-10 && x<vineid.x+10)
             if(swinging==0)
                 swinging=1;
@@ -768,7 +773,7 @@ begin
             end
 //        end
 
-        if(framecount%130==1)
+        if(framecount%150==1)
             if(psize==100)
                 pdir=-5;
             else
