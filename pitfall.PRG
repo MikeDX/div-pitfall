@@ -52,7 +52,7 @@ begin
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
 
-    put(file,1,sw/2,sh/2);//+offy-1);
+    put(file,3,sw/2,sh/2);//+offy-1);
 
 //    write_int(0,0,64,0,&level);
 
@@ -94,7 +94,7 @@ begin
     trees();
 
     // 1 of 3 paths (solid, ladder, ladder + holes)
-//    path();
+    path();
     ladderproc();
 
     // pit or quicksand
@@ -433,9 +433,6 @@ private
     boty=164+offy;
     groundy;
     crocid=0;
-    onladder=0;
-    falling=0;
-    climbing=0;
 
 begin
     graph=10;
@@ -443,8 +440,8 @@ begin
     x=24+offx;
     y=offy+25;
 
-    write_int(0,0,0,0,&x);
-    write_int(0,0,8,0,&y);
+//    write_int(0,0,0,0,&x);
+//    write_int(0,0,8,0,&y);
     z=-40;
 loop
     if(holes==0)
@@ -471,7 +468,6 @@ loop
     end
 
     if(x>92 && x< 214 && collision(type pit))
-        //debug;
         y+=2;
         crocid=collision(type crocproc);
         y-=2;
@@ -484,18 +480,38 @@ loop
 
     if(above==0)
         groundy=boty;
-        if(holes==0)
-            og=graph;
-            graph=10;
-            y-=3;
-            crocid=collision(type scorpion);
-            y+=3;
-            graph=og;
-            if(crocid)
+        og=graph;
+        graph=10;
+        graph=og;
+        crocid=collision(type scorpion);
+
+        if(crocid)
+            if(holes==0) // hit a scorpion
                 death();
                 return;
+            else
+                // hit a wall
+                playsound(fx.hit1);
+                if(flags==0)
+                    if(crocid.x>x)
+                        x-=3;
+                        if(dir!=0)
+                            dir=-1;
+                            flags=1;
+                        end
+                    end
+                else
+                    if(crocid.x<x)
+                        x+=3;
+                        if(dir!=0)
+                            dir=1;
+                            flags=0;
+                        end
+                    end
+                end
             end
         end
+
     else
         groundy=topy;
     end
@@ -567,7 +583,7 @@ loop
         end
     end
 
-    if(y<groundy || yx==-4 && climbing==0)
+    if(y<groundy || yx==-4)
     //!collision(type ladderproc))
         if(yx<0 && y>vineid.y-10 && y<vineid.y+20
             && x>vineid.x-10 && x<vineid.x+10)
@@ -612,27 +628,27 @@ loop
         end
     end
 
-    if(holes>0)
+    if(holes>0 && y==topy || y==boty)
         og=graph;
         graph=10;
         crocid=collision(type ladderproc);
         graph=og;
-        //debug;
         if(crocid)
             if ( (crocid.graph==39 || crocid.graph==37 || crocid.graph==18) )
-                if(crocid.graph==37)
-                    debug;
-                end
+
+                repeat
+
                 if(y<boty && key(_down))
+                    graph=36;
                     x=152;
                     y++;
-                    climbing=1;
                 end
+
                 if(y>topy && key(_up))
                     if(y>topy+5)
+                        graph=36;
                         x=152;
                         y--;
-                        climbing=1;
                     end
 
                     if(y<topy+10)
@@ -645,46 +661,37 @@ loop
                             else
                                 dir=1;
                             end
-                            climbing=0;
                         end
                     end
 
                 end
 
                 if(y>topy && y<boty && graph!=11)
-                    onladder=1;
                     graph=36;
                     flags=((y/4)&1);
                 end
 
+                if(y!=topy && y!=boty)
+                    frame;
+                end
+                until(y==topy || y==boty);
             end
-            //og=x;
+
             if(y==topy && !key(_down) && !key(_up))
-               // debug;
-                //x-=2;
-                //reserved.id_scan=0;
 
                 if(x>crocid.x-(4+4*(crocid.graph==38)) && x<crocid.x+4+4*(crocid.graph==38))
-                   // debug;
-                   // x/+=4;
-                  //  reserved.id_scan=0;
 
-                    if(1)
-              //          x=og;
+                    graph=10;
 
-                        //falling=1;
-                        graph=10;
-                        playsound(fx.fall);
+                    playsound(fx.fall);
 
-                        while(y<boty)
-                            y++;
-                            frame;
-                        end
-                    //yx=1;
+                    while(y<boty)
+                        y++;
+                        frame;
                     end
+
                  end
              end
-             //x=og;
         end
     end
 
