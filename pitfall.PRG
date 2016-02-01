@@ -51,22 +51,9 @@ begin
     set_fps(fpsec,2);
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
+    intro();
 
     put(file,3,sw/2,sh/2);
-
-    //+offy-1);
-
-//    write_int(0,0,64,0,&level);
-
-//graph=3;
-//region=1;
-//ctype=c_scroll;
-    size=100;
-    x=sw/2;//304/2;
-    y=sh/2;//191/2;
-//flags=4;
-    //z=1024;
-    //next_level();
 
     game();
 
@@ -77,8 +64,6 @@ begin
         frame;
 
     end
-
-    frame;
 
 end
 
@@ -738,11 +723,11 @@ loop
 
                 if(y>topy && y<boty && graph!=11)
                     graph=36;
-                    flags=((y/4)&1);
+                    flags=((y/8)&1);
                 end
 
                 if(y!=topy && y!=boty)
-                    frame(200);
+                    frame;
                 end
                 until(y==topy || y==boty);
             end
@@ -927,12 +912,19 @@ begin
 end
 
 
-function playsound(num)
+process playsound(num)
 
+private
+
+psound=0;
 begin
 
-    x=sound(num,256,256);
-    change_sound(x,256,soundspeed);
+    if(is_playing_sound(psound))
+        stop_sound(psound);
+    end
+
+    psound=sound(num,256,256);
+    change_sound(psound,256,soundspeed);
 
 end
 
@@ -1100,3 +1092,27 @@ begin
     end
 
 end
+
+function intro()
+
+begin
+
+    graph=1;
+
+    x=160;
+    y=120;
+
+    timer[0]=0;
+
+    while(timer[0]<200)
+        frame;
+    end
+
+    fade_off();
+    while(fading)
+        frame;
+    end
+    fade_on();
+
+end
+
