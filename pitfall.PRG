@@ -165,8 +165,10 @@ begin
         x-=32;
     end
 
-    clone
-        x+=32;
+    if(x==(sw/2-9))
+        clone
+            x+=32;
+        end
     end
 
     graph=32;
@@ -293,52 +295,64 @@ process ladderproc()
 
 begin
 
-x=sw/2;
-y=149;
-graph=18;
-z--;
+    x=sw/2;
+    y=149;
+    graph=18;
+    z=-1;
 
-clone
-graph=39;
-x=sw/2-8;
-y=155;
-z++;
-end
+    clone
+        graph=39;
+        x=sw/2-8;
+        y=155;
+        z=256;
+    end
 
-clone
-graph=37;
-y=175;
-x=sw/2-8;
-z++;
-end
-
-clone
-graph=38;
-y=154;
-x=100;
-end
-
-clone
-graph=38;
-y=154;
-x=204;
-end
-
-
-loop
-    size=0;
-
-    if(holes==3)
-        size=100;
-    else
-        if(holes==1 && (graph == 39 || graph == 37))
-            size=100;
+    if(graph==18)
+        clone
+            graph=37;
+            y=175;
+            x=sw/2-8;
+            z=256;
         end
     end
 
-    frame;
+    if(graph==18)
+        clone
+            graph=38;
+            y=154;
+            x=100;
+            z=256;
+        end
+    end
 
-end
+    if(graph==18)
+        clone
+            graph=38;
+            y=154;
+            x=204;
+            z=256;
+        end
+    end
+
+
+    loop
+        size=0;
+
+        if(holes==3)
+            size=100;
+        else
+            if(holes==1 && (graph == 39 || graph == 37))
+                size=100;
+            end
+        end
+
+        if(graph==18)
+            size=100;
+        end
+
+        frame;
+
+    end
 
 
 end
@@ -356,22 +370,25 @@ end
 process death()
 private
     t=0;
+
 begin
-alive=0;
-x=father.x;
-y=father.y;
-graph=father.graph;
-flags=father.flags;
+    alive=0;
+    x=father.x;
+    y=father.y;
+    graph=father.graph;
+    flags=father.flags;
 
-playsound(fx.death);
-//debug;
-while(t<fpsec*2)
-t++;
-frame;
+    playsound(fx.death);
+
+    while(t<fpsec*2)
+        t++;
+    frame;
+
 end
+    // respawn harry
+    harryid=harry();
+    son.y=y-30;
 
-harryid=harry();
-son.y=y-30;
 end
 
 
@@ -379,27 +396,23 @@ end
 process dropdeath()
 
 begin
-alive=0;
-x=father.x;
-y=father.y;
-graph=father.graph;
-flags=father.flags;
-father.graph=0;
-//signal(father.father,s_sleep_tree);
-//signal(father,s_kill);
-//frame;
-define_region(2,x-10,y-10,20,20);
-region=2;
-//debug;
-playsound(fx.death);
-//debug;
-while(y<150)
-y++;
-frame(200);
+    alive=0;
+    x=father.x;
+    y=father.y;
+    graph=father.graph;
+    flags=father.flags;
+    father.graph=0;
+    define_region(2,x-10,y-10,20,20);
+    region=2;
+    playsound(fx.death);
 
-end
+    while(y<150)
+        y++;
+        frame(200);
 
-harryid=harry();
+    end
+
+    harryid=harry();
 
 end
 
@@ -420,14 +433,15 @@ private
     boty=164+offy;
     groundy;
     crocid=0;
-
+    onladder=0;
 begin
     graph=10;
 
     x=24+offx;
     y=offy+25;
-    //write_int(0,0,0,0,&x);
-    //write_int(0,0,16,0,&y);
+
+    write_int(0,0,0,0,&x);
+    write_int(0,0,8,0,&y);
 
 loop
 
@@ -545,7 +559,7 @@ loop
         end
     end
 
-    if(y<groundy || yx==-4)
+    if(y<groundy || yx==-4 && !collision(type ladderproc))
         if(yx<0 && y>vineid.y-10 && y<vineid.y+20
             && x>vineid.x-10 && x<vineid.x+10)
             if(swinging==0)
@@ -589,18 +603,50 @@ loop
         end
     end
 
-    if(collision(type ladderproc))
-        graph=36;
-    end
+    if(holes>0)
+        crocid=collision(type ladderproc);
+        if(crocid)
+            if ( (crocid.graph==39 || crocid.graph==37 || crocid.graph==18) )
 
+                if(y<boty && key(_down))
+                    x=152;
+                    y++;
+                end
+                if(key(_up))
+                    if(y>topy+5)
+                        x=152;
+                        y--;
+                    end
+
+                    if(y<topy+10)
+                        if(key(_left) || key(_right))
+                            y=topy;
+                            yx=-4;
+
+                            if(key(_left))
+                                dir=-1;
+                            else
+                                dir=1;
+                            end
+                        end
+                    end
+
+                end
+
+                if(y>topy && y<boty)
+                    onladder=1;
+                    graph=36;
+                    flags=((y/4)&1);
+                end
+            end
+        end
+    end
 
     while((key(_q) || key(_w)))
         frame;
     end
-    //end
 
-
-frame;
+    frame;
 end
 
 end
