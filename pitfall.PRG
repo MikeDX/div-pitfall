@@ -105,9 +105,6 @@ begin
     // snake or fire
     object();
 
-    // left, right or no wall
-    //walls();
-
     // player-chasing scorpion (or walls)
     scorpion();
 
@@ -211,11 +208,11 @@ end
 process trees()
 
 begin
-
+//    size=0;
     graph=5;
     x=sw/2-8;
     y=82+offy;
-
+ //   flags=4;
     clone
         graph=4;
 //        z=-256;
@@ -224,6 +221,12 @@ begin
     end
 
     loop
+/*        if(key(_o))
+            size=100;
+        else
+            size=0;
+        end
+ */
         frame;
     end
 
@@ -287,7 +290,7 @@ process ladderproc()
 begin
 
 x=sw/2-8;
-y=174;
+y=175;
 
 loop
 
@@ -507,7 +510,7 @@ loop
     end
 
     if(y<groundy || yx==-4)
-        if(yx<0 && y>vineid.y-10 && y<vineid.y+15
+        if(yx<0 && y>vineid.y-10 && y<vineid.y+20
             && x>vineid.x-10 && x<vineid.x+10)
             if(swinging==0)
                 swinging=1;
@@ -538,9 +541,22 @@ loop
     if(x<16 || key(_q)) x=304; level_left(1+(3*(above==0))); end
     if(x>304 || key(_w)) x=16; level_right(1+(3*(above==0))); end
 
-    while(key(_q) || key(_w))
-        frame;
+    crocid=collision(type object);
+
+    if(crocid)
+        if(crocid.graph==19 || crocid.graph==20)
+            graph=22;
+            playsound(fx.hit1);
+        else
+            death();
+            return;
+        end
     end
+
+
+   // while(!(SHIFT_STATUS) && (key(_q) || key(_w)))
+   //     frame;
+   // end
     //end
 
 
@@ -656,14 +672,16 @@ if(holes==0)
     end
 else
 
-    graph=21;
-    y=159+offy;
-    if(bit[7]==1)
-        x=280;
-    else
-        x=20;
-    end
+    // not a scorpion, a ladder!
 
+    graph=21;
+    y=158+offy;
+
+    if(bit[7]==1)
+        x=273;
+    else
+        x=35;
+    end
 end
 
 
