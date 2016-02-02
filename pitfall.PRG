@@ -4,8 +4,6 @@ const
     sw=320;
     sh=240;
     fpsec=50;
-    floor=110;
-    base=210;
     offx=8;
     offy=25;
 
@@ -26,6 +24,7 @@ global
     holes=0;
     vine=0;
     crocs=0;
+
     struct time
         m=20;
         s=0;
@@ -36,6 +35,8 @@ global
     score=2000;
 
     level=0;
+
+    // level as binary
     bit[8];
 
     // sounds
@@ -50,6 +51,7 @@ global
     end
 
     framecount=0;
+
     soundspeed=256*((fpsec*1000)/50)/1000;
 
 begin
@@ -61,6 +63,7 @@ begin
     intro();
 
     put(file,3,sw/2,sh/2);
+    define_region(7,offx,offy,304,192);
 
     game();
 
@@ -76,8 +79,11 @@ end
 
 
 process game()
+
 private
-firstrun=1;
+
+    firstrun=1;
+
 begin
 
     vineid=vineproc();
@@ -138,13 +144,16 @@ end
 
 
 process showtimer();
+
 private
-string timestring="";
-string oldstring="xx:xx";
-om=0;
-os=0;
+//    string timestring="";
+//    string oldstring="xx:xx";
+
+    om=0;
+    os=0;
+
 begin
-y=45;
+    y=45;
 
 //write(0,0,8,0,timestring);
 
@@ -162,7 +171,7 @@ loop
 
         map_put(file,4,60+(time.m%10),x,y);
         map_put(file,4,60+(time.m/10)%10,x-16,y);
-        oldstring=timestring;
+        //oldstring=timestring;
         om=time.m;
         os=time.s;
     end
@@ -387,57 +396,130 @@ end
 
 process object();
 
+private
+logid=0;
+fc=0;
+logbits[3];
+lcount=0;
+oldlevel=0;
 begin
 
 x=249;
 y=144;
 z-=30;
+region=7;
+
+clone
+logid=1;
+end
+
+if(logid==0)
+    clone
+    logid=2;
+    end
+end
+
+write_int(0,(2-logid)*8,0,0,&bit[logid]);
+write_int(0,(2-logid)*8,8,0,&logbits[logid]);
+
+
 
 loop
+
+    if(level!=oldlevel)
+        lcount=310;
+        oldlevel=level;
+    end
+
     x=249;
     y=144;
     graph=0;
     flags=0;
-    if(treasure)
-        flags=0;
-        switch(level&3)
-            case 0:
-                graph=44;
-            end
 
-            case 1:
-                graph=47+rand(0,1);
-            end
+    if(logid==0)
+        if(treasure)
+            flags=0;
+            switch(level&3)
+                case 0:
+                    graph=44;
+                end
 
-            case 2:
-                graph=45+rand(0,1);
-            end
+                case 1:
+                    graph=47+rand(0,1);
+                end
 
-            case 3:
-                graph=49;
+                case 2:
+                    graph=45+rand(0,1);
+                end
+
+                case 3:
+                    graph=49;
+                end
             end
+        end
+
+
+        if(snake==1)
+            graph=34+(framecount&1);
+        end
+
+        if(snake==2)
+        //size=200;
+            graph=16+rand(0,1);
         end
     end
 
-
-    if(snake==1)
-        graph=34+(framecount&1);
-    end
-
-    if(snake==2)
-        //size=200;
-        graph=16+rand(0,1);
-    end
 
     if(logs>0)
         graph=20;
-        if(logs<5)
-            graph=20-((framecount/4)&1);
-            x=offx+6+288-(framecount%288);
-            y=144+(x%16<3);
-        end
 
+        if(logs<5)
+            logbits[0]=1;
+            logbits[1]=bit[0];
+            logbits[2]=bit[1];
+
+            if(logbits[logid])
+            // || (logid==0 && (bit[0]==0 && bit[1]==0 && bit[2]==0)))
+                graph=20-((framecount/4)&1);
+                //fc=framecount;
+
+                fc=(lcount+360)-32*logid;
+                /*
+                if(logid==2)
+                    fc=framecount-32;
+                end
+
+                if(logid==1)
+                    fc=framecount+32;
+                end
+                */
+                x=offx+6+288-(fc%310);
+                y=144+(x%16<3);
+            else
+                graph=0;
+            end
+        else
+            graph=0;
+            if(logs==5)
+                x-=8;
+            end
+
+            if(bit[0] || logid==0)
+                graph=20;
+
+                if(logid==2)
+                    x+=64;
+                end
+
+                if(logid==1)
+                    x=55;
+                end
+
+            end
+        end
     end
+
+    lcount++;
 
     frame;
 
@@ -855,8 +937,9 @@ loop
 
     end
 
-    if(x<16 || key(_q)) x=304; level_left(1+(3*(above==0))); end
-    if(x>304 || key(_w)) x=16; level_right(1+(3*(above==0))); end
+    if(x<25 || key(_q)) x=295; level_left(1+(3*(above==0))); end
+
+    if(x>295 || key(_w)) x=25; level_right(1+(3*(above==0))); end
 
 
     if(logs==0 && treasure==0)
@@ -1106,7 +1189,8 @@ if(holes==0)
     end
 else
 
-    // not a scorpion, a ladder!
+    // not a scorpion, a wall! ls
+
 
     graph=21;
     y=158+offy;
@@ -1203,7 +1287,8 @@ private
 scroll_map=0;
 
 begin
-//return;
+
+return;
 
 scroll_map=new_map(304,191,152,95,1);
 
