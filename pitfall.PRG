@@ -295,7 +295,7 @@ begin
 
     if(vine)
         x=x1+sin(framecount*2*700)/15;
-        y=-375+cos(abs(x1-x)*180)/2;
+        y=-373+cos(abs(x1-x)*180)/2;
     else
         x=x1;y=y1;
     end
@@ -483,7 +483,7 @@ loop
                 graph=20-((framecount/4)&1);
                 //fc=framecount;
 
-                fc=(lcount+360)-32*logid;
+                fc=(lcount+365)-32*logid;
                 /*
                 if(logid==2)
                     fc=framecount-32;
@@ -519,7 +519,9 @@ loop
         end
     end
 
-    lcount++;
+    if(alive)
+        lcount++;
+    end
 
     frame;
 
@@ -937,11 +939,6 @@ loop
 
     end
 
-    if(x<25 || key(_q)) x=295; level_left(1+(3*(above==0))); end
-
-    if(x>295 || key(_w)) x=25; level_right(1+(3*(above==0))); end
-
-
     if(logs==0 && treasure==0)
 
         og=graph;
@@ -1066,6 +1063,11 @@ loop
              end
         end
     end
+
+    if(x<25 || key(_q)) x=295; level_left(1+(3*(above==0))); end
+
+    if(x>295 || key(_w)) x=25; level_right(1+(3*(above==0))); end
+
 
     while((key(_q) || key(_w)))
         frame;
