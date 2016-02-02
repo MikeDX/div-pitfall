@@ -1,13 +1,32 @@
+/*
+
+########################################
+
+ATARI 2600 PITFALL REMAKE
+
+Made with div games studio in 48 hours
+
+
+see http://github.com/MikeDX/div-pitfall for license information
+
+(c) 2016 MikeDX
+
+########################################
+
+*/
+
 program pitfall;
 
 const
-    sw=320;
-    sh=240;
-    fpsec=50;
-    offx=8;
-    offy=25;
+
+    sw=320;     // screen width
+    sh=240;     // screen height
+    fpsec=50;   // raget fps
+    offx=8;     // screen x offset
+    offy=25;    // screen y offset
 
 global
+
     vineid=0;
     harryid=0;
 
@@ -58,9 +77,13 @@ begin
 
     load_sounds();
     set_fps(fpsec,2);
+
+    //load_pal("PAL/visibone.PAL");
+
     load_fpg("pitfall/pitfall.fpg");
     set_mode(sw*1000+sh);
     intro();
+
 
     put(file,3,sw/2,sh/2);
 
@@ -86,7 +109,7 @@ process game()
 private
 
     firstrun=1;
-
+    nextpal=0;
 begin
 
     vineid=vineproc();
@@ -117,7 +140,7 @@ begin
     son.y=134;
 
 loop
-    if(key(_enter) || firstrun)
+    if((key(_enter) && lives<0) || firstrun)
         alive=0;
         level=196;
         time.m=20;
@@ -138,8 +161,12 @@ loop
 
         //lives=2;
         //level=192
+        nextpal=timer[0]+100;
     end
 
+    if(lives==-1)
+        // roll activision logo / copyright
+    end
     frame;
 end
 
@@ -425,7 +452,6 @@ begin
     end
 
     loop
-        if(alive)
 
         if(level!=oldlevel)
             lcount=310;
@@ -443,31 +469,31 @@ begin
 
                 switch(level&3)
 
-                    case 0:
+                    case 0: // money bag
                         graph=44;
                     end
 
-                    case 1:
-                        graph=47+rand(0,1);
+                    case 1: // silver bar
+                        graph=47+rand(0,alive);
                     end
 
-                    case 2:
-                        graph=45+rand(0,1);
+                    case 2: // gold bar
+                        graph=45+rand(0,alive);
                     end
 
-                    case 3:
+                    case 3: // diaond ring
                         graph=49;
                     end
 
                 end
             end
 
-            if(snake==1)
+            if(snake==1) // cobra
                 graph=34+(framecount&1);
             end
 
-            if(snake==2)
-                graph=16+rand(0,1);
+            if(snake==2) // fire
+                graph=16+rand(0,alive);
             end
         end
 
@@ -513,8 +539,6 @@ begin
 
         if(alive)
             lcount++;
-        end
-
         end
 
         frame;
@@ -634,6 +658,13 @@ begin
     if(lives>=0)
         harryid=harry();
 
+        // put scorpion in his place
+        if(holes==0)
+
+            t=get_id(type scorpion);
+            t.x=sw/2;
+        end
+
         if(y>160)
             son.y=y-25;
             define_region(2,18,167,26,32);
@@ -644,10 +675,6 @@ begin
 
         harryid.region=2;
 
-    else
-        loop
-            frame;
-        end
     end
 
 end
@@ -703,6 +730,7 @@ private
     groundy;
     crocid=0;
     lastspace=0;
+    vinebox=0;
 
 begin
     graph=10;
@@ -715,6 +743,7 @@ begin
 //    write_int(0,0,16,0,&groundy);
 
     z=-40;
+
     if(lives==2)
         while(!key(_left) && !key(_right) && !key(_space))
             frame;
@@ -722,6 +751,7 @@ begin
         alive=1;
     end
 
+    //vinebox = draw(3,255,7,7,0,0,vineid.x,vineid.y);
 loop
     if(holes==0)
         z=-40;
@@ -789,27 +819,19 @@ loop
         x=vineid.x;
         y=vineid.y;
         graph=2;
+
         if(key(_down))
             swinging=0;
             yx=0;
             y+=4;
+
             if(flags==0)
                 dir=1;
             else
                 dir=-1;
             end
-           /*
-            if(key(_left))
-                dir=-1;
-                flags=1;
-            end
-
-            if(key(_right))
-                dir=1;
-                flags=0;
-            end
-            */
         end
+
     end
 
     if(y==groundy)
@@ -888,15 +910,21 @@ loop
     end
 
     graph=og;
+    //move_draw(vinebox,255,7,vineid.x-10,vineid.y-20,vineid.x+10,vineid.y+20);
 
     if(y<groundy || yx==-4)
     //!collision(type ladderproc))
-        if(yx<0 && y>vineid.y-10 && y<vineid.y+30
-            && x>vineid.x-10 && x<vineid.x+10)
-            if(swinging==0)
-                swinging=1;
-                playsound(fx.swing);
-            end
+       // if(vine==1)
+
+            if(yx<0 && y>vineid.y-20 && y<vineid.y+20
+                && x>vineid.x-10 && x<vineid.x+10)
+
+                if(swinging==0)
+                    swinging=1;
+                    playsound(fx.swing);
+                end
+         //   end
+
         else
             d++;
             if(d%3==0)
@@ -1054,9 +1082,9 @@ loop
     if(x>295 || key(_w)) x=18; level_right(1+(3*(above==0))); end
 
 
-    while((key(_q) || key(_w)))
-        frame;
-    end
+    //while((key(_q) || key(_w)))
+    //    frame;
+    //end
 
     frame;
 end
@@ -1140,13 +1168,14 @@ loop;
         oldlevel=level;
     end
 
+/*
     if(alive==0 && harryid!=0)
         if(harryid.y<y-10 && x<sw/2)
             x=sw/2;
         end
 
     end
-
+*/
 if(holes==0)
     if(graph==21)
         graph=30;
