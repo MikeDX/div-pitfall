@@ -419,8 +419,8 @@ if(logid==0)
     end
 end
 
-write_int(0,(2-logid)*8,0,0,&bit[logid]);
-write_int(0,(2-logid)*8,8,0,&logbits[logid]);
+//write_int(0,(2-logid)*8,0,0,&bit[logid]);
+//write_int(0,(2-logid)*8,8,0,&logbits[logid]);
 
 
 
