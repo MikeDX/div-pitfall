@@ -1087,9 +1087,9 @@ loop
     if(x>295 || key(_w)) x=18; level_right(1+(3*(above==0))); end
 
 
-    //while((key(_q) || key(_w)))
-    //    frame;
-    //end
+    while((key(_q) || key(_w)))
+        frame;
+    end
 
     frame;
 end
