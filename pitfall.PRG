@@ -675,6 +675,11 @@ begin
 
         harryid.region=2;
 
+    else
+    // keep harry on screen when game over
+        loop
+            frame;
+        end
     end
 
 end
@@ -912,7 +917,7 @@ loop
     graph=og;
     //move_draw(vinebox,255,7,vineid.x-10,vineid.y-20,vineid.x+10,vineid.y+20);
 
-    if(y<groundy || yx==-4)
+    if(y<groundy || yx<5)
     //!collision(type ladderproc))
        // if(vine==1)
 
@@ -1008,7 +1013,7 @@ loop
                     if(score>0)
                         score--;
                     end
-
+                    //debug;
                     playsound(fx.hit1);
                     y+=2;
                 end
