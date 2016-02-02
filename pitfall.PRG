@@ -1004,7 +1004,7 @@ loop
                     y++;
                 end
 
-                if(y!=topy && collision(type object))
+                if(y!=topy && swinging==0 && collision(type object))
                     if(score>0)
                         score--;
                     end
