@@ -63,11 +63,14 @@ begin
     intro();
 
     put(file,3,sw/2,sh/2);
+
+    // the virtual screen
     define_region(7,offx,offy,304,192);
 
     game();
 
     loop
+
         if(alive)
             framecount++;
         end
@@ -374,7 +377,7 @@ oldlevel;
 
 begin
     x=sw/2;
-    y=80+offy;
+    y=81+offy;
 
     clone
         graph=4;
@@ -397,135 +400,123 @@ end
 process object();
 
 private
-logid=0;
-fc=0;
-logbits[3];
-lcount=0;
-oldlevel=0;
+
+    logid=0;
+    fc=0;
+    logbits[3];
+    lcount=0;
+    oldlevel=0;
+
 begin
-
-x=249;
-y=144;
-z-=30;
-region=7;
-
-clone
-logid=1;
-end
-
-if(logid==0)
-    clone
-    logid=2;
-    end
-end
-
-//write_int(0,(2-logid)*8,0,0,&bit[logid]);
-//write_int(0,(2-logid)*8,8,0,&logbits[logid]);
-
-
-
-loop
-
-    if(level!=oldlevel)
-        lcount=310;
-        oldlevel=level;
-    end
 
     x=249;
     y=144;
-    graph=0;
-    flags=0;
+    z-=30;
+    region=7;
+
+    clone
+        logid=1;
+    end
 
     if(logid==0)
-        if(treasure)
-            flags=0;
-            switch(level&3)
-                case 0:
-                    graph=44;
-                end
-
-                case 1:
-                    graph=47+rand(0,1);
-                end
-
-                case 2:
-                    graph=45+rand(0,1);
-                end
-
-                case 3:
-                    graph=49;
-                end
-            end
-        end
-
-
-        if(snake==1)
-            graph=34+(framecount&1);
-        end
-
-        if(snake==2)
-        //size=200;
-            graph=16+rand(0,1);
+        clone
+            logid=2;
         end
     end
 
+    loop
 
-    if(logs>0)
-        graph=20;
+        if(level!=oldlevel)
+            lcount=310;
+            oldlevel=level;
+        end
 
-        if(logs<5)
-            logbits[0]=1;
-            logbits[1]=bit[0];
-            logbits[2]=bit[1];
+        x=249;
+        y=144;
+        graph=0;
+        flags=0;
 
-            if(logbits[logid])
-            // || (logid==0 && (bit[0]==0 && bit[1]==0 && bit[2]==0)))
-                graph=20-((framecount/4)&1);
-                //fc=framecount;
+        if(logid==0)
+            if(treasure)
+                flags=0;
 
-                fc=(lcount+365)-32*logid;
-                /*
-                if(logid==2)
-                    fc=framecount-32;
+                switch(level&3)
+
+                    case 0:
+                        graph=44;
+                    end
+
+                    case 1:
+                        graph=47+rand(0,1);
+                    end
+
+                    case 2:
+                        graph=45+rand(0,1);
+                    end
+
+                    case 3:
+                        graph=49;
+                    end
+
                 end
+            end
 
-                if(logid==1)
-                    fc=framecount+32;
+            if(snake==1)
+                graph=34+(framecount&1);
+            end
+
+            if(snake==2)
+                graph=16+rand(0,1);
+            end
+        end
+
+        if(logs>0)
+            graph=20;
+
+            if(logs<5)
+                logbits[0]=1;
+                logbits[1]=bit[0];
+                logbits[2]=bit[1];
+
+                if(logbits[logid])
+                    graph=20-((framecount/4)&1);
+
+                    fc=(lcount+365)-32*logid;
+
+                    x=offx+6+288-(fc%310);
+                    y=144+(x%16<3);
+                else
+                    graph=0;
                 end
-                */
-                x=offx+6+288-(fc%310);
-                y=144+(x%16<3);
             else
                 graph=0;
-            end
-        else
-            graph=0;
-            if(logs==5)
-                x-=8;
-            end
 
-            if(bit[0] || logid==0)
-                graph=20;
-
-                if(logid==2)
-                    x+=64;
+                if(logs==5)
+                    x-=8;
                 end
 
-                if(logid==1)
-                    x=55;
-                end
+                if(bit[0] || logid==0)
+                    graph=20;
 
+                    if(logid==2)
+                        x+=64;
+                    end
+
+                    if(logid==1)
+                        x=55;
+                    end
+
+                end
             end
         end
+
+        if(alive)
+            lcount++;
+        end
+
+        frame;
+
     end
-
-    if(alive)
-        lcount++;
-    end
-
-    frame;
-
-end
 
 end
 
@@ -639,11 +630,11 @@ begin
     lives--;
     if(lives>=0)
         harryid=harry();
-        son.y=y-30;
+        son.y=y-60;
         if(y>160)
             define_region(2,18,167,26,32);
         else
-            define_region(2,24,73,35,95);
+            define_region(2,24,80,35,95);
         end
 
         harryid.region=2;
@@ -684,7 +675,7 @@ begin
     if(lives>=0)
         harryid=harry();
     end
-    define_region(2,24,73,35,95);
+    define_region(2,24,80,35,95);
     harryid.region=2;
 
 end
