@@ -425,6 +425,7 @@ begin
     end
 
     loop
+        if(alive)
 
         if(level!=oldlevel)
             lcount=310;
@@ -512,6 +513,8 @@ begin
 
         if(alive)
             lcount++;
+        end
+
         end
 
         frame;
@@ -630,10 +633,12 @@ begin
     lives--;
     if(lives>=0)
         harryid=harry();
-        son.y=y-60;
+
         if(y>160)
+            son.y=y-25;
             define_region(2,18,167,26,32);
         else
+            son.y=y-60;
             define_region(2,24,80,35,95);
         end
 
@@ -716,6 +721,7 @@ begin
         end
         alive=1;
     end
+
 loop
     if(holes==0)
         z=-40;
@@ -730,18 +736,6 @@ loop
     else
         above=1;
     end
-
-    /*
-    if(crocid)
-        if(crocid.graph==33)
-            if(x<crocid.x+2)
-                //debug;
-                dropdeath();
-                return;
-            end
-        end
-    end
-    */
 
     if(above==0)
         groundy=boty;
@@ -1040,7 +1034,7 @@ loop
 
                     while(y<boty)
                         y++;
-                        if(y>groundy-24)
+                        if(y>groundy-16)
                             graph=11;
                         end
 
@@ -1055,9 +1049,9 @@ loop
         end
     end
 
-    if(x<25 || key(_q)) x=295; level_left(1+(3*(above==0))); end
+    if(x<18 || key(_q)) x=295; level_left(1+(3*(above==0))); end
 
-    if(x>295 || key(_w)) x=25; level_right(1+(3*(above==0))); end
+    if(x>295 || key(_w)) x=18; level_right(1+(3*(above==0))); end
 
 
     while((key(_q) || key(_w)))
@@ -1361,6 +1355,7 @@ begin
         case 4:  // croc pit
             crocs=1;
             tarpit=2; // lake
+
             if(bit[1])  // plus vine if bit 1
                 vine=1;
             end
