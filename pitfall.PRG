@@ -971,7 +971,7 @@ loop
             crocid.graph=0;
             playsound(fx.treasure);
         else
-            if(crocid.graph==19 || crocid.graph==20)
+            if(swinging==0 && (crocid.graph==19 || crocid.graph==20))
                 graph=22;
 
                 if(score>0)
