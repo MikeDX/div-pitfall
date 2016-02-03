@@ -21,18 +21,18 @@ const
 
     sw=320;     // screen width
     sh=240;     // screen height
-    fpsec=50;   // raget fps
+    fpsec=50;   // target fps
     offx=8;     // screen x offset
     offy=25;    // screen y offset
 
 global
 
-    vineid=0;
-    harryid=0;
+    vineid=0;   // vine id
+    harryid=0;  // player id
 
     alive=1;
 
-    // level data
+    // level data decoded from level number
     tarpit=0;
     shifting=0;
     snake=0;
@@ -176,8 +176,6 @@ end
 process showtimer();
 
 private
-//    string timestring="";
-//    string oldstring="xx:xx";
 
     om=0;
     os=0;
@@ -185,12 +183,11 @@ private
 begin
     y=45;
 
-//write(0,0,8,0,timestring);
+//    write_int(0,0,8,3,&timer[0]);
 
 loop
 
     if(om!=time.m || os!=time.s)
-    //strcmp(oldstring,timestring))
         x=113;
         y=18;
 
@@ -201,13 +198,13 @@ loop
 
         map_put(file,4,60+(time.m%10),x,y);
         map_put(file,4,60+(time.m/10)%10,x-16,y);
-        //oldstring=timestring;
+
         om=time.m;
         os=time.s;
     end
 
 
-    if(framecount%fpsec==fpsec-1)
+    if(framecount%50==49)
         time.s--;
 
         if(time.s<0)
@@ -218,22 +215,8 @@ loop
         while(framecount%fpsec==fpsec-1)
             frame;
         end
- /*
-        timestring="";
 
-        if(time.m<10)
-            timestring+="0";
-        end
-
-        timestring+=itoa(time.m)+":";
-
-        if(time.s<10)
-            timestring+="0";
-        end
-
-        timestring+=itoa(time.s);
-   */
-    end
+     end
 
     frame;
 end
@@ -755,6 +738,8 @@ begin
         end
         alive=1;
     end
+
+    //timer[0]=0;
 
     //vinebox = draw(3,255,7,7,0,0,vineid.x,vineid.y);
 loop
