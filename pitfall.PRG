@@ -7,7 +7,7 @@ ATARI 2600 PITFALL REMAKE
 Made with div games studio in 48 hours
 
 TODO: 
-	Eng game when time is 00:00
+	End game when time is 00:00
 	
 
 see http://github.com/MikeDX/div-pitfall for license information
