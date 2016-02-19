@@ -6,6 +6,9 @@ ATARI 2600 PITFALL REMAKE
 
 Made with div games studio in 48 hours
 
+TODO: 
+	Eng game when time is 00:00
+	
 
 see http://github.com/MikeDX/div-pitfall for license information
 
@@ -143,7 +146,7 @@ loop
     if((key(_enter) && lives<0) || firstrun)
         alive=0;
         level=196;
-        time.m=20;
+        time.m=0;
         time.s=0;
         lives=2;
         firstrun=0;
@@ -196,7 +199,12 @@ loop
         map_put(file,4,70,x-32,y);
         x-=48;
 
-        map_put(file,4,60+(time.m%10),x,y);
+        if(time.m>0)
+            map_put(file,4,60+(time.m%10),x,y);
+        else
+            map_put(file,4,70,x,y);
+        end
+
         map_put(file,4,60+(time.m/10)%10,x-16,y);
 
         om=time.m;
